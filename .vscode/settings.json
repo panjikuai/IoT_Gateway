@@ -1,0 +1,20 @@
+{
+    "files.associations": {
+        "type_traits": "cpp",
+        "airkiss.c": "cpp",
+        "jd_smart_config.c": "cpp",
+        "main.c": "cpp",
+        "jd_device.c": "cpp",
+        "wifi.c": "cpp",
+        "buttons.c": "cpp",
+        "gateway_manager.c": "cpp",
+        "network_manager.c": "cpp",
+        "sound_voice.c": "cpp",
+        "wm8978.c": "cpp",
+        "zigbee_cmd_service.c": "cpp",
+        "queue_uart.c": "cpp",
+        "bt_app_core.c": "cpp",
+        "a2dp.c": "cpp",
+        "bt_app_av.c": "cpp"
+    }
+}
