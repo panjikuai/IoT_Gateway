@@ -152,36 +152,37 @@ void app_main(void)
 	IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO, ("RAM left %d\n", esp_get_free_heap_size()) );
     ESP_ERROR_CHECK( nvs_flash_init() );
 
-	Sound_Voice_Init();
 
+	Sound_Voice_Init();
 	A2DP_Init();
-    // tcpip_adapter_init();
-    // ESP_ERROR_CHECK( esp_event_loop_init(event_handler, NULL) );
-    // wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    // ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+
+    tcpip_adapter_init();
+    ESP_ERROR_CHECK( esp_event_loop_init(event_handler, NULL) );
+    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
 #ifdef _IOT_DEBUG_
 	create_debug_semaphore();
 #endif
 
-    // gpio_set_direction(GPIO_NUM_2, GPIO_MODE_OUTPUT);
-    // button_init(NULL, reload_button_pressed);
+    gpio_set_direction(GPIO_NUM_2, GPIO_MODE_OUTPUT);
+    button_init(NULL, reload_button_pressed);
 	
-	// system_timer = xTimerCreate("SYS_Timer", 500 / portTICK_PERIOD_MS, pdTRUE, 0, system_timer_callback );
-	// xTimerStart(system_timer,0);
+	system_timer = xTimerCreate("SYS_Timer", 500 / portTICK_PERIOD_MS, pdTRUE, 0, system_timer_callback );
+	xTimerStart(system_timer,0);
 
+    wifi_param_set_queue = xQueueCreate( 1, sizeof(WiFiConfigParam_t) );
 
-    // wifi_param_set_queue = xQueueCreate( 1, sizeof(WiFiConfigParam_t) );
+    if (wifi_get_Wifi_param(&g_wifi_param) != ESP_OK){
+		airkiss_start(smartconfig_airkiss_callback);
+    }else{
+    	wifi_connect_to_target_ap(&g_wifi_param);
+		GatewayManager_Init();
+		NetworkManager_Init();
+    }
+	
 
-    // if (wifi_get_Wifi_param(&g_wifi_param) != ESP_OK){
-	// 	airkiss_start(smartconfig_airkiss_callback);
-    // }else{
-    	// wifi_connect_to_target_ap(&g_wifi_param);
-		// GatewayManager_Init();
-		// NetworkManager_Init();
-    // }
-	// Sound_Voice_Init();
-    // xTaskCreate(&wifi_Task, "WIFI", 2048, NULL, tskIDLE_PRIORITY+1, NULL);
+    xTaskCreate(&wifi_Task, "WIFI", 2048, NULL, tskIDLE_PRIORITY+1, NULL);
 }
 
 

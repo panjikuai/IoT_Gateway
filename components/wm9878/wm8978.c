@@ -240,7 +240,7 @@ int WM8978_Init(void)
 	WM8978_Input_Cfg(0,0,0);
 	WM8978_Output_Cfg(1,0);
 	WM8978_HPvol_Set(30,30);
-	WM8978_SPKvol_Set(30);
+	WM8978_SPKvol_Set(63);
 
 	return 0;
 }

@@ -64,7 +64,7 @@ static void bt_av_hdl_stack_evt(uint16_t event, void *p_param)
     switch (event) {
     case BT_APP_EVT_STACK_UP: {
         /* set up device name */
-        char *dev_name = "ESP_SPEAKER";
+        char *dev_name = "iSpeaker";
         esp_bt_dev_set_device_name(dev_name);
 
         /* initialize A2DP sink */
