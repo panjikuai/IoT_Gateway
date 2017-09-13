@@ -210,7 +210,7 @@ uint8_t generate_packet(AppCmdDescriptor_t* pCmdDesc)
 
 
 /* send packet to zigbee serial send task and wait for result */
-bool zigbee_cmd_service_process_packet(AppCmdDescriptor_t* pCmdDesc)
+bool ZigbeeCmdService_ProcessPacket(AppCmdDescriptor_t* pCmdDesc)
 {
 	uint8_t packet_len;
 	uint8_t result;
@@ -254,7 +254,7 @@ bool zigbee_cmd_service_process_packet(AppCmdDescriptor_t* pCmdDesc)
 	return false;
 }
 
-void zigbee_cmd_service_init(void)
+void ZigbeeCmdService_Init(void)
 {
 	zigbee_cmd_queue = xQueueCreate(ZIGBEE_CMD_QUEUE_LEN, sizeof(void *));
 	zigbee_cmd_result_queue = xQueueCreate(ZIGBEE_CMD_RESULT_QUEUE_LEN, sizeof(uint8_t));

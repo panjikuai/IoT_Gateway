@@ -4,7 +4,7 @@
 
 #define INFO_QUERY_TIMEOUT  (50)
 
-void zigbee_ognz_query_gateway_info(AppCmdDescriptor_t *cmdDesc)
+void ZigbeeOgnz_QueryGatewayInfo(AppCmdDescriptor_t *cmdDesc)
 {
 	cmdDesc->length = HEAD_SIZE_GATEWAY_MGMT;
 	cmdDesc->packType = PACK_TYPE_GATEWAY_MANAGEMENT;
@@ -13,7 +13,7 @@ void zigbee_ognz_query_gateway_info(AppCmdDescriptor_t *cmdDesc)
 	cmdDesc->timeout = INFO_QUERY_TIMEOUT;
 }
 
-void zigbee_ognz_query_device_group_scene_list(AppCmdDescriptor_t *cmdDesc,uint8_t command)
+void ZigbeeOgnz_QueryDeviceGroupSceneList(AppCmdDescriptor_t *cmdDesc,uint8_t command)
 {
 	cmdDesc->length = HEAD_SIZE_OGNZ_MGMT;
 	cmdDesc->packType = PACK_TYPE_ORGANIZATION_DESCRIPTION;
@@ -25,7 +25,7 @@ void zigbee_ognz_query_device_group_scene_list(AppCmdDescriptor_t *cmdDesc,uint8
 // OGNZ_MGMT_GET_DEVICE_INFO        = 0x00,
 // OGNZ_MGMT_GET_GROUP_INFO         = 0x01,
 // OGNZ_MGMT_GET_SCENE_INFO         = 0x02,
-void zigbee_ognz_query_device_group_scene_info(AppCmdDescriptor_t *cmdDesc,uint8_t command,uint8_t address)
+void ZigbeeOgnz_QueryDeviceGroupSceneInfo(AppCmdDescriptor_t *cmdDesc,uint8_t command,uint8_t address)
 {
 	cmdDesc->length = HEAD_SIZE_OGNZ_MGMT + sizeof(OgnzMgmtQuery_t);
 	cmdDesc->packType = PACK_TYPE_ORGANIZATION_DESCRIPTION;
@@ -36,7 +36,7 @@ void zigbee_ognz_query_device_group_scene_info(AppCmdDescriptor_t *cmdDesc,uint8
 	cmdDesc->timeout = INFO_QUERY_TIMEOUT;
 }
 
-void zigbee_ognz_query_zgp_device_list(AppCmdDescriptor_t *cmdDesc)
+void ZigbeeOgnz_QueryZgpDeviceList(AppCmdDescriptor_t *cmdDesc)
 {
 	cmdDesc->length = HEAD_SIZE_OGNZ_MGMT;
 	cmdDesc->packType = PACK_TYPE_ORGANIZATION_DESCRIPTION;
@@ -45,7 +45,7 @@ void zigbee_ognz_query_zgp_device_list(AppCmdDescriptor_t *cmdDesc)
 	cmdDesc->timeout = INFO_QUERY_TIMEOUT;
 }
 
-void zigbee_ognz_query_zgp_device_info(AppCmdDescriptor_t *cmdDesc,uint8_t address)
+void ZigbeeOgnz_QueryZgpDeviceInfo(AppCmdDescriptor_t *cmdDesc,uint8_t address)
 {
 	cmdDesc->length = HEAD_SIZE_OGNZ_MGMT + sizeof(OgnzMgmtZgpDeviceInfoQuery_t);
 	cmdDesc->packType = PACK_TYPE_ORGANIZATION_DESCRIPTION;

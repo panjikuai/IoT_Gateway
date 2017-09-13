@@ -4,7 +4,7 @@
 
 #define GW_INFO_QUERY_TIMEOUT  (50)
 
-void zigbee_gateway_query_gateway_info(AppCmdDescriptor_t *cmdDesc)
+void ZigbeeGateway_QueryGatewayInfo(AppCmdDescriptor_t *cmdDesc)
 {
 	cmdDesc->length = HEAD_SIZE_GATEWAY_MGMT;
 	cmdDesc->packType = PACK_TYPE_GATEWAY_MANAGEMENT;

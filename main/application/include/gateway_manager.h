@@ -174,7 +174,7 @@ typedef struct{
 		uint32_t scene_index;
 		uint64_t device_index[2];
 	};
-}info_query_t;
+}InfoQuery_t;
 
 // ZGP device trigger
 typedef struct{

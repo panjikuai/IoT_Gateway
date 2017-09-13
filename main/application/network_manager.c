@@ -23,7 +23,7 @@ extern Wifi_status_t gWifiStatus;
 int local_udp_socket = -1;
 uint8_t udp_recv_buf[RX_MAX_BUFFER_SIZE + SOCKET_ADDR_MAX_SIZE];
 uint8_t udp_send_Buff[SEND_MAX_BUFF_SIZE+ 20 ];
-QueueHandle_t network_in_queue = NULL;
+QueueHandle_t networkInQueue = NULL;
 
 TimerHandle_t deviceInfoReportTimer = NULL;
 extern void get_ip_address(uint8_t *ip);
@@ -48,7 +48,7 @@ bool isSyncDataPackageRequest(network_header_t *header)
 bool sendAcknowledge(network_header_t *header,struct sockaddr *addr)
 {
 	memcpy(udp_send_Buff, (uint8_t *)header, sizeof(network_header_t));
-	network_message_t *message =(network_message_t *)udp_send_Buff;
+	NetworkMessage_t *message =(NetworkMessage_t *)udp_send_Buff;
 	message->networkHeader.messageType = NETWORK_MSG_TYPE_ACK;
 	message->networkHeader.packageLength = 0;
 
@@ -60,9 +60,9 @@ bool sendAcknowledge(network_header_t *header,struct sockaddr *addr)
 }
 
 
-void handle_udp_request(uint8_t *buff, int32_t length)
+void handleUdpRequest(uint8_t *buff, int32_t length)
 {
-	network_message_t *message= (network_message_t *)buff;
+	NetworkMessage_t *message= (NetworkMessage_t *)buff;
 	struct sockaddr sourceAddr;
 	uint8_t *pAddr = buff + RX_MAX_BUFFER_SIZE;
 	memcpy((uint8_t*)&sourceAddr, pAddr, sizeof(struct sockaddr));
@@ -79,9 +79,9 @@ void handle_udp_request(uint8_t *buff, int32_t length)
 		}
 		message->sourceAddr = sourceAddr;
 
-		xQueueSend(network_in_queue, message, 0);// Add buff to Queue
+		xQueueSend(networkInQueue, message, 0);// Add buff to Queue
 		if (length > packageLength){
-			message = (network_message_t *)(buff + packageLength);
+			message = (NetworkMessage_t *)(buff + packageLength);
 			packageLength += message->contentLength + NETWORK_MESSAGE_LENGTH;
 		}else{
 			return;
@@ -113,7 +113,7 @@ void networkCommTask(void *pvParameter)
 				printf("\n");
 				uint8_t *p = udp_recv_buf + RX_MAX_BUFFER_SIZE;
 				memcpy(p, (uint8_t*)&sAddr, sizeof(struct sockaddr));
-				handle_udp_request(udp_recv_buf, lRetVal);
+				handleUdpRequest(udp_recv_buf, lRetVal);
 			 }else if (lRetVal == -1){
 				 close(local_udp_socket);
 				 local_udp_socket = -1;
@@ -141,8 +141,8 @@ void networkMaintainTask(void *pvParameter)
 			}
 		}
 
-		network_message_t message;
-		if(xQueueReceive(network_in_queue, &message, 0)){
+		NetworkMessage_t message;
+		if(xQueueReceive(networkInQueue, &message, 0)){
 			GatewayManager_HandleNetworkRequest((void *)&message);
 		}
 		vTaskDelay(2/portTICK_PERIOD_MS);
@@ -152,7 +152,7 @@ void networkMaintainTask(void *pvParameter)
 }
 
 
-void load_report_info(network_message_t *message)
+void loadReportInfo(NetworkMessage_t *message)
 {
 	struct sockaddr_in sAddr={
 		.sin_family = AF_INET,
@@ -192,13 +192,13 @@ void load_report_info(network_message_t *message)
 }
 
 
-void deviceInfoReportTimer_callback( TimerHandle_t xTimer )
+void deviceInfoReportTimerCallback( TimerHandle_t xTimer )
 {
 	static uint8_t reportCount = 0;
-	network_message_t message;
+	NetworkMessage_t message;
 	if (gWifiStatus == WIFI_STATUS_GOT_IP && local_udp_socket != -1){
-		load_report_info(&message);
-		xQueueSend(network_in_queue, &message, 0);// Add buff to Queue
+		loadReportInfo(&message);
+		xQueueSend(networkInQueue, &message, 0);// Add buff to Queue
 		reportCount++;
 		if (reportCount >= 3){
 			xTimerStop(deviceInfoReportTimer,0);
@@ -209,10 +209,10 @@ void deviceInfoReportTimer_callback( TimerHandle_t xTimer )
 
 void NetworkManager_Init(void)
 {
-	deviceInfoReportTimer = xTimerCreate("ReportTimer", 1000 / portTICK_PERIOD_MS, pdTRUE, 0, deviceInfoReportTimer_callback );
+	deviceInfoReportTimer = xTimerCreate("ReportTimer", 1000 / portTICK_PERIOD_MS, pdTRUE, 0, deviceInfoReportTimerCallback );
 	xTimerStart(deviceInfoReportTimer,0);
 
-	network_in_queue = xQueueCreate( 5, sizeof(network_message_t) );
+	networkInQueue = xQueueCreate( 5, sizeof(NetworkMessage_t) );
 	xTaskCreate(&networkMaintainTask, "LOCAL_UDP", 4096, NULL, tskIDLE_PRIORITY+2, NULL);
 	xTaskCreate(&networkCommTask,  	  "UDP_SOCK", 2048, NULL, tskIDLE_PRIORITY+5, NULL);
 }

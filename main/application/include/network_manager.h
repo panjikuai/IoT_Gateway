@@ -71,7 +71,7 @@ typedef struct {
 		uint8_t content[MAX_PAYLOAD_SIZE -5];	//
 	};
 	struct sockaddr sourceAddr;
-}network_message_t;
+}NetworkMessage_t;
 
 #define NETWORK_MESSAGE_LENGTH   (sizeof(network_header_t) + 4)
 

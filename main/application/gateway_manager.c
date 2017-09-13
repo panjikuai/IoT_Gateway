@@ -28,10 +28,10 @@ extern void get_wifi_mac_address(uint8_t *mac);
 
 zigbee_ognz_info_t		g_zigbee_ognz_info;
 
-QueueHandle_t zigbee_queue_cmd_in = NULL;
-QueueHandle_t zigbee_queue_cmd_out = NULL;
-QueueHandle_t zigbee_info_queue_query_start = NULL;
-TimerHandle_t zigbee_info_query_timer = NULL;
+QueueHandle_t zigbeeQueueCmdIn = NULL;
+QueueHandle_t zigbeeQueueCmdOut = NULL;
+QueueHandle_t zigbeeInfoQueueQueryStart = NULL;
+TimerHandle_t zigbeeInfoQueryTimer = NULL;
 
 
 
@@ -40,7 +40,7 @@ zigbee_gateway_info_t *GatewayManager_GetGatewayInfo(void)
 	return &g_zigbee_ognz_info.gateway_info;
 }
 
-void zigbee_ognz_info_init(void)
+void ZigbeeOgnzInfo_Init(void)
 {
 	memset((uint8_t *)&g_zigbee_ognz_info.gateway_info, 0, sizeof(zigbee_gateway_info_t));
 	memset((uint8_t *)&g_zigbee_ognz_info.group_list, 	0, sizeof(zigbee_group_list_t));
@@ -283,9 +283,9 @@ uint16_t get_device_state_by_block_index(uint8_t *buff, uint8_t blockIndex)
 	return size;
 }
 
-void process_gateway_connect_packet(network_message_t *msg)
+void process_gateway_connect_packet(NetworkMessage_t *msg)
 {
-	network_message_t *message =(network_message_t *)udp_send_Buff;
+	NetworkMessage_t *message =(NetworkMessage_t *)udp_send_Buff;
 	memcpy((uint8_t *)&message->networkHeader, (uint8_t *)&msg->networkHeader, sizeof(network_header_t));
 	message->networkHeader.messageType = NETWORK_MSG_TYPE_NON;
 	message->networkHeader.packageLength = 4 + sizeof(GetNetworkConnectInfo_t);
@@ -323,7 +323,7 @@ void process_gateway_connect_packet(network_message_t *msg)
 	return true;
 }
 
-bool process_ognz_struct_packet(network_message_t *msg)
+bool process_ognz_struct_packet(NetworkMessage_t *msg)
 {
 	uint16_t size;
 	zigbee_group_list_t   *zigbee_group_list;
@@ -332,7 +332,7 @@ bool process_ognz_struct_packet(network_message_t *msg)
 	zigbee_scene_info_t	  *zigbee_scene_info;
 	zigbee_device_list_t  *zigbee_device_list;
 
-	network_message_t *message = (network_message_t *)udp_send_Buff;
+	NetworkMessage_t *message = (NetworkMessage_t *)udp_send_Buff;
 	memcpy(&message->networkHeader,&msg->networkHeader, sizeof(network_header_t));
 
 	message->networkHeader.messageType = NETWORK_MSG_TYPE_NON;
@@ -402,7 +402,7 @@ bool process_ognz_struct_packet(network_message_t *msg)
 	return true;
 }
 
-bool process_devices_info_packet(network_message_t *msg)
+bool process_devices_info_packet(NetworkMessage_t *msg)
 {
 	//rand()%65536;
 	uint16_t size;
@@ -410,7 +410,7 @@ bool process_devices_info_packet(network_message_t *msg)
 	zigbee_device_info_t  *zigbee_device_info;
 	uint16_t *device_info_start_index;
 
-	network_message_t *message = (network_message_t *)udp_send_Buff;
+	NetworkMessage_t *message = (NetworkMessage_t *)udp_send_Buff;
 	memcpy(&message->networkHeader,&msg->networkHeader, sizeof(network_header_t));
 
 	message->networkHeader.messageType = NETWORK_MSG_TYPE_NON;
@@ -467,11 +467,11 @@ bool process_devices_info_packet(network_message_t *msg)
 	return true;
 }
 
-bool process_device_state_packet(network_message_t *msg)
+bool process_device_state_packet(NetworkMessage_t *msg)
 {
 	uint16_t size;
 
-	network_message_t *message = (network_message_t *)udp_send_Buff;
+	NetworkMessage_t *message = (NetworkMessage_t *)udp_send_Buff;
 	memcpy(&message->networkHeader,&msg->networkHeader, sizeof(network_header_t));
 	message->networkHeader.messageType = NETWORK_MSG_TYPE_NON;
 	message->networkHeader.sumFrames  = 1;
@@ -587,63 +587,63 @@ bool isQuryableDevice(uint16_t deviceId)
 
 bool push_info_query_to_queue(AppCmdDescriptor_t *cmdDesc,device_info_t *deviceInfo)
 {
-	int32_t queueAvailableCount = uxQueueSpacesAvailable(zigbee_queue_cmd_in);
+	int32_t queueAvailableCount = uxQueueSpacesAvailable(zigbeeQueueCmdIn);
 
 	uint8_t result = false;
 	switch(deviceInfo->deviceId){
 	case ZLL_ON_OFF_LIGHT_DEVICE_ID:
 		if (queueAvailableCount >= 2){
-			zigbee_query_on_off(cmdDesc,deviceInfo->address,deviceInfo->endpoint);
-			xQueueSend( zigbee_queue_cmd_in, cmdDesc, 0 );
+			ZigbeeQuery_OnOff(cmdDesc,deviceInfo->address,deviceInfo->endpoint);
+			xQueueSend( zigbeeQueueCmdIn, cmdDesc, 0 );
 			result = true;
 		}
 		break;
 	case ZLL_DIMMABLE_LIGHT_DEVICE_ID:
 		if (queueAvailableCount >= 3){
-			zigbee_query_on_off(cmdDesc,deviceInfo->address,deviceInfo->endpoint);
-			xQueueSend( zigbee_queue_cmd_in, cmdDesc, 0 );
+			ZigbeeQuery_OnOff(cmdDesc,deviceInfo->address,deviceInfo->endpoint);
+			xQueueSend( zigbeeQueueCmdIn, cmdDesc, 0 );
 
-			zigbee_query_level(cmdDesc,deviceInfo->address,deviceInfo->endpoint);
-			xQueueSend( zigbee_queue_cmd_in, cmdDesc, 0 );
+			ZigbeeQuery_Level(cmdDesc,deviceInfo->address,deviceInfo->endpoint);
+			xQueueSend( zigbeeQueueCmdIn, cmdDesc, 0 );
 			result = true;
 		}
 		break;
 	case ZLL_COLOR_LIGHT_DEVICE_ID:
 		if (queueAvailableCount >= 4){
-			zigbee_query_on_off(cmdDesc,deviceInfo->address,deviceInfo->endpoint);
-			xQueueSend( zigbee_queue_cmd_in, cmdDesc, 0 );
+			ZigbeeQuery_OnOff(cmdDesc,deviceInfo->address,deviceInfo->endpoint);
+			xQueueSend( zigbeeQueueCmdIn, cmdDesc, 0 );
 
-			zigbee_query_level(cmdDesc,deviceInfo->address,deviceInfo->endpoint);
-			xQueueSend( zigbee_queue_cmd_in, cmdDesc, 0 );
+			ZigbeeQuery_Level(cmdDesc,deviceInfo->address,deviceInfo->endpoint);
+			xQueueSend( zigbeeQueueCmdIn, cmdDesc, 0 );
 
-			zigbee_query_color(cmdDesc,deviceInfo->address,deviceInfo->endpoint);
-			xQueueSend( zigbee_queue_cmd_in, cmdDesc, 0 );
+			ZigbeeQuery_Color(cmdDesc,deviceInfo->address,deviceInfo->endpoint);
+			xQueueSend( zigbeeQueueCmdIn, cmdDesc, 0 );
 			result = true;
 		}
 		break;
 	case ZLL_EXTENDED_COLOR_LIGHT_DEVICE_ID:
 		if (queueAvailableCount >= 4){
-			zigbee_query_on_off(cmdDesc,deviceInfo->address,deviceInfo->endpoint);
-			xQueueSend( zigbee_queue_cmd_in, cmdDesc, 0 );
+			ZigbeeQuery_OnOff(cmdDesc,deviceInfo->address,deviceInfo->endpoint);
+			xQueueSend( zigbeeQueueCmdIn, cmdDesc, 0 );
 
-			zigbee_query_level(cmdDesc,deviceInfo->address,deviceInfo->endpoint);
-			xQueueSend( zigbee_queue_cmd_in, cmdDesc, 0 );
+			ZigbeeQuery_Level(cmdDesc,deviceInfo->address,deviceInfo->endpoint);
+			xQueueSend( zigbeeQueueCmdIn, cmdDesc, 0 );
 
-			zigbee_query_extended_color(cmdDesc,deviceInfo->address,deviceInfo->endpoint);
-			xQueueSend( zigbee_queue_cmd_in, cmdDesc, 0 );
+			ZigbeeQuery_ExtendedColor(cmdDesc,deviceInfo->address,deviceInfo->endpoint);
+			xQueueSend( zigbeeQueueCmdIn, cmdDesc, 0 );
 			result = true;
 		}
 		break;
 	case ZLL_TEMPERATURE_COLOR_LIGHT_DEVICE_ID:
 		if (queueAvailableCount >= 4){
-			zigbee_query_on_off(cmdDesc,deviceInfo->address,deviceInfo->endpoint);
-			xQueueSend( zigbee_queue_cmd_in, cmdDesc, 0 );
+			ZigbeeQuery_OnOff(cmdDesc,deviceInfo->address,deviceInfo->endpoint);
+			xQueueSend( zigbeeQueueCmdIn, cmdDesc, 0 );
 
-			zigbee_query_level(cmdDesc,deviceInfo->address,deviceInfo->endpoint);
-			xQueueSend( zigbee_queue_cmd_in, cmdDesc, 0 );
+			ZigbeeQuery_Level(cmdDesc,deviceInfo->address,deviceInfo->endpoint);
+			xQueueSend( zigbeeQueueCmdIn, cmdDesc, 0 );
 
-			zigbee_query_colortemp(cmdDesc,deviceInfo->address,deviceInfo->endpoint);
-			xQueueSend( zigbee_queue_cmd_in, cmdDesc, 0 );
+			ZigbeeQuery_ColorTemperature(cmdDesc,deviceInfo->address,deviceInfo->endpoint);
+			xQueueSend( zigbeeQueueCmdIn, cmdDesc, 0 );
 			result = true;
 		}
 		break;
@@ -654,13 +654,13 @@ bool push_info_query_to_queue(AppCmdDescriptor_t *cmdDesc,device_info_t *deviceI
 	return result;
 }
 
-void zigbee_device_state_query(AppCmdDescriptor_t *cmdDesc)
+void zigbeeDeviceStateQuery(AppCmdDescriptor_t *cmdDesc)
 {
 	static uint8_t nodeIndex = 0;
 	zigbee_node_info_t *pNode = NULL;
 
 	if (nodeIndex == 0){
-		xTimerChangePeriod( zigbee_info_query_timer, DEVICE_INFO_QUERY_SHORT_INTERVAL/portTICK_PERIOD_MS, 0 );
+		xTimerChangePeriod( zigbeeInfoQueryTimer, DEVICE_INFO_QUERY_SHORT_INTERVAL/portTICK_PERIOD_MS, 0 );
 	}
 	pNode = query_node_by_index(nodeIndex);
 	if(pNode != NULL){
@@ -677,7 +677,7 @@ void zigbee_device_state_query(AppCmdDescriptor_t *cmdDesc)
 		pNode = query_node_by_index(++nodeIndex);
 	}
 	nodeIndex = 0;
-	xTimerChangePeriod( zigbee_info_query_timer, DEVICE_INFO_QUERY_INTERVAL/portTICK_PERIOD_MS, 0 );
+	xTimerChangePeriod( zigbeeInfoQueryTimer, DEVICE_INFO_QUERY_INTERVAL/portTICK_PERIOD_MS, 0 );
 }
 
 void zigbee_cmd_callback(Cmd_Response_t *resp, struct sockaddr addr,network_header_t networkHeader,uint8_t packTypeId, uint8_t command)
@@ -687,7 +687,7 @@ void zigbee_cmd_callback(Cmd_Response_t *resp, struct sockaddr addr,network_head
 	}
 	// need to feedback
 	AppCmdDescriptor_t *cmdDesc = (AppCmdDescriptor_t *)resp->responsePayload;
-	network_message_t message;
+	NetworkMessage_t message;
 	memcpy(&message.networkHeader,&networkHeader,sizeof(network_header_t));
 	message.networkHeader.messageType = NETWORK_MSG_TYPE_NON;
 	message.networkHeader.sumFrames  = 1;
@@ -701,14 +701,14 @@ void zigbee_cmd_callback(Cmd_Response_t *resp, struct sockaddr addr,network_head
 
 	message.sourceAddr = addr;
 	// memcpy((uint8_t *)&message.sourceAddr,(uint8_t *)&addr,sizeof(struct sockaddr));
-	xQueueSend(zigbee_queue_cmd_out, &message, 0 );
+	xQueueSend(zigbeeQueueCmdOut, &message, 0 );
 
 	if (packTypeId == MSG_TYPE_ID_CONFIG){
 		if (command == CMD_CONFIG_ZGIBEE_DEVICE && resp->status == 0){
 			// update group scene info
-			info_query_t infoQuery;
+			InfoQuery_t infoQuery;
 			infoQuery.query_type = QUERY_OGNZ_STRUCTURE;
-			xQueueSend( zigbee_info_queue_query_start, &infoQuery, 0);
+			xQueueSend( zigbeeInfoQueueQueryStart, &infoQuery, 0);
 		}else if (command == CMD_CONFIG_ZIGBEE_GATEWAY){
 			// update device info
 			
@@ -721,16 +721,16 @@ bool zigbee_ctrl_cmd_handle(AppCmdDescriptor_t *cmdDesc,DeviceOprt_t *deviceCtrl
 	bool validCmd = true;
 	if (deviceCtrl->clusterId == ONOFF_CLUSTER_ID){
 		IoT_DEBUG(LWIP_DBG | IoT_DBG_WARNING,("ONOFF_CLUSTER_ID\n"));
-		zigbee_ctrl_on_off(cmdDesc,deviceCtrl->addrMode,deviceCtrl->address,deviceCtrl->endpoint,deviceCtrl->commandId);
+		ZigbeeCtrl_OnOff(cmdDesc,deviceCtrl->addrMode,deviceCtrl->address,deviceCtrl->endpoint,deviceCtrl->commandId);
 	}else if (deviceCtrl->clusterId == LEVEL_CONTROL_CLUSTER_ID){
 		IoT_DEBUG(LWIP_DBG | IoT_DBG_WARNING,("LEVEL_CONTROL_CLUSTER_ID\n"));
 		if ( deviceCtrl->commandId == ZCL_LEVEL_CONTROL_CLUSTER_MOVE_TO_LEVEL_COMMAND_ID || deviceCtrl->commandId == ZCL_LEVEL_CONTROL_CLUSTER_MOVE_TO_LEVEL_W_ONOFF_COMMAND_ID){
-			zigbee_ctrl_move_to_level( cmdDesc,deviceCtrl->addrMode,deviceCtrl->address,deviceCtrl->endpoint,
+			ZigbeeCtrl_MoveToLevel( cmdDesc,deviceCtrl->addrMode,deviceCtrl->address,deviceCtrl->endpoint,
 					deviceCtrl->commandId,
 					deviceCtrl->DeviceCmdOprt.moveToLevel.level,
 					deviceCtrl->DeviceCmdOprt.moveToLevel.transitionTime);
 		}else if (deviceCtrl->commandId == ZCL_LEVEL_CONTROL_CLUSTER_MOVE_COMMAND_ID || deviceCtrl->commandId == ZCL_LEVEL_CONTROL_CLUSTER_MOVE_W_ONOFF_COMMAND_ID){
-			zigbee_ctrl_move_level(cmdDesc,deviceCtrl->addrMode,deviceCtrl->address,deviceCtrl->endpoint,
+			ZigbeeCtrl_MoveLevel(cmdDesc,deviceCtrl->addrMode,deviceCtrl->address,deviceCtrl->endpoint,
 					deviceCtrl->commandId,
 					deviceCtrl->DeviceCmdOprt.moveLevel.moveMode,
 					deviceCtrl->DeviceCmdOprt.moveLevel.rate);
@@ -738,17 +738,17 @@ bool zigbee_ctrl_cmd_handle(AppCmdDescriptor_t *cmdDesc,DeviceOprt_t *deviceCtrl
 	}else if (deviceCtrl->clusterId == COLOR_CONTROL_CLUSTER_ID){
 		IoT_DEBUG(LWIP_DBG | IoT_DBG_WARNING,("COLOR_CONTROL_CLUSTER_ID\n"));
 		if (deviceCtrl->commandId == ENHANCED_MOVE_TO_HUE_AND_SATURATION_COMMAND_ID){
-			zigbee_ctrl_enhanced_move_to_hue_and_saturation(cmdDesc,deviceCtrl->addrMode,deviceCtrl->address,deviceCtrl->endpoint,
+			ZigbeeCtrl_EnhancedMoveToHueAndSaturation(cmdDesc,deviceCtrl->addrMode,deviceCtrl->address,deviceCtrl->endpoint,
 					deviceCtrl->DeviceCmdOprt.enhancedMoveToHueAndSaturation.enhancedHue,
 					deviceCtrl->DeviceCmdOprt.enhancedMoveToHueAndSaturation.saturation,
 					deviceCtrl->DeviceCmdOprt.enhancedMoveToHueAndSaturation.transitionTime);
 		}else if (deviceCtrl->commandId == MOVE_TO_COLOR_TEMPERATURE_COMMAND_ID){
-			zigbee_ctrl_move_to_colorTemperature(cmdDesc,deviceCtrl->addrMode,deviceCtrl->address,deviceCtrl->endpoint,
+			ZigbeeCtrl_MoveToColorTemperature(cmdDesc,deviceCtrl->addrMode,deviceCtrl->address,deviceCtrl->endpoint,
 					deviceCtrl->DeviceCmdOprt.moveToColorTemperature.colorTemperature,
 					deviceCtrl->DeviceCmdOprt.moveToColorTemperature.transitionTime);
 		}
 	}else if (deviceCtrl->clusterId == SCENES_CLUSTER_ID){
-		zigbee_ctrl_recall_scene(cmdDesc,deviceCtrl->addrMode,deviceCtrl->address,deviceCtrl->endpoint,
+		ZigbeeCtrl_RecallScene(cmdDesc,deviceCtrl->addrMode,deviceCtrl->address,deviceCtrl->endpoint,
 					deviceCtrl->DeviceCmdOprt.recallScene.groupId, deviceCtrl->DeviceCmdOprt.recallScene.sceneId);
 	}else{
 		validCmd = false;
@@ -764,19 +764,19 @@ bool zigbee_config_cmd_handle(AppCmdDescriptor_t *cmdDesc,GroupSceneMgmt_t *grou
 			|| groupSceneOpt->commandId == ZCL_GROUPS_CLUSTER_ADD_GROUP_IF_IDENTIFYING_COMMAND_ID
 			|| groupSceneOpt->commandId == ZCL_GROUPS_CLUSTER_REMOVE_GROUP_COMMAND_ID
 			|| groupSceneOpt->commandId == ZCL_GROUPS_CLUSTER_REMOVE_ALL_GROUPS_COMMAND_ID){
-			zigbee_add_remove_group(cmdDesc,groupSceneOpt->address,groupSceneOpt->endpoint,groupSceneOpt->GroupSceneCmd.addGroup.groupId, groupSceneOpt->commandId);
+			ZigbeeGroup_AddRemoveGroup(cmdDesc,groupSceneOpt->address,groupSceneOpt->endpoint,groupSceneOpt->GroupSceneCmd.addGroup.groupId, groupSceneOpt->commandId);
 		}
 	}else if(groupSceneOpt->clusterId == SCENES_CLUSTER_ID){
 		if (   groupSceneOpt->commandId == ZCL_SCENES_CLUSTER_ADD_SCENE_COMMAND_ID
 			|| groupSceneOpt->commandId == ZCL_SCENES_CLUSTER_STORE_SCENE_COMMAND_ID
 			|| groupSceneOpt->commandId == ZCL_SCENES_CLUSTER_REMOVE_SCENE_COMMAND_ID
 			|| groupSceneOpt->commandId == ZCL_SCENES_CLUSTER_REMOVE_ALL_SCENES_COMMAND_ID){
-			zigbee_scene_add_remove_store_scene(cmdDesc,groupSceneOpt->addrMode,groupSceneOpt->address,groupSceneOpt->endpoint,groupSceneOpt->commandId,
+				ZigbeeScene_AddRemoveStoreScene(cmdDesc,groupSceneOpt->addrMode,groupSceneOpt->address,groupSceneOpt->endpoint,groupSceneOpt->commandId,
 					groupSceneOpt->GroupSceneCmd.addScene.groupId,
 					groupSceneOpt->GroupSceneCmd.addScene.sceneId,
 					groupSceneOpt->GroupSceneCmd.addScene.transitionTime);
 		}else if (groupSceneOpt->commandId == ZCL_SCENES_CLUSTER_ENHANCED_ADD_SCENE_COMMAND_ID){
-			zigbee_scene_enhanced_add_scene(cmdDesc,groupSceneOpt->addrMode,groupSceneOpt->address,groupSceneOpt->endpoint,groupSceneOpt->GroupSceneCmd.enhancedAddScene.groupId,
+			ZigbeeScene_EnhancedAddScene(cmdDesc,groupSceneOpt->addrMode,groupSceneOpt->address,groupSceneOpt->endpoint,groupSceneOpt->GroupSceneCmd.enhancedAddScene.groupId,
 					groupSceneOpt->GroupSceneCmd.enhancedAddScene.sceneId, groupSceneOpt->GroupSceneCmd.enhancedAddScene.transitionTime,
 					groupSceneOpt->GroupSceneCmd.enhancedAddScene.onOffClusterExtFields.onOffValue,
 					groupSceneOpt->GroupSceneCmd.enhancedAddScene.levelControlClusterExtFields.currentLevel,
@@ -797,13 +797,13 @@ bool zigbee_network_cmd_handle(AppCmdDescriptor_t *cmdDesc,NwkMgmt_t *nwkmgnt)
 {
 	bool validCmd = true;
 	if (nwkmgnt->commandId == NWK_MGMT_RST_GATEWAY_TO_FN){
-		zigbee_network_reset_gateway_to_fn(cmdDesc);
+		ZigbeeNetwork_ResetGatewayToFn(cmdDesc);
 	}else if (nwkmgnt->commandId == NWK_MGMT_TOUCHLINK){
-		zigbee_network_touchlink(cmdDesc);
+		ZigbeeNetwork_Touchlink(cmdDesc);
 	}else if (nwkmgnt->commandId == NWK_MGMT_CLASSIC_JOIN_PERMIT_JOIN){
-		zigbee_network_classic_permit_join(cmdDesc);
+		ZigbeeNetwork_ClassicPermitJoin(cmdDesc);
 	}else if (nwkmgnt->commandId == NWK_MGMT_CLASSIC_JOIN_RST_LIGHT_TO_FN){
-		zigbee_network_reset_device_to_fn(cmdDesc,nwkmgnt->NwkMgmtClassicJoinRstTargetToFn.address, nwkmgnt->NwkMgmtClassicJoinRstTargetToFn.endpoint);
+		ZigbeeNetwork_ResetDeviceToFn(cmdDesc,nwkmgnt->NwkMgmtClassicJoinRstTargetToFn.address, nwkmgnt->NwkMgmtClassicJoinRstTargetToFn.endpoint);
 	}else{
 		validCmd = false;
 	}
@@ -812,7 +812,7 @@ bool zigbee_network_cmd_handle(AppCmdDescriptor_t *cmdDesc,NwkMgmt_t *nwkmgnt)
 
 void GatewayManager_HandleNetworkRequest(void *msg)
 {
-	network_message_t *message = (network_message_t *)msg;
+	NetworkMessage_t *message = (NetworkMessage_t *)msg;
 	AppCmdDescriptor_t cmdDesc;
 
 	IoT_DEBUG(LWIP_DBG | IoT_DBG_WARNING,("GET: messageType:%02x,packTypeId:%02x\r\n",message->networkHeader.messageType, message->packTypeId));
@@ -838,7 +838,7 @@ void GatewayManager_HandleNetworkRequest(void *msg)
 			cmdDesc.command = message->command;
 			cmdDesc.sourceAddr = message->sourceAddr;
 			cmdDesc.cmd_response_callback = zigbee_cmd_callback;
-			xQueueSend( zigbee_queue_cmd_in, &cmdDesc, 0 );
+			xQueueSend( zigbeeQueueCmdIn, &cmdDesc, 0 );
 		}
 		break;
 	case MSG_TYPE_ID_CONFIG:
@@ -850,7 +850,7 @@ void GatewayManager_HandleNetworkRequest(void *msg)
 				cmdDesc.command = message->command;
 				cmdDesc.sourceAddr = message->sourceAddr;
 				cmdDesc.cmd_response_callback = zigbee_cmd_callback;//
-				xQueueSend( zigbee_queue_cmd_in, &cmdDesc, 0 );
+				xQueueSend( zigbeeQueueCmdIn, &cmdDesc, 0 );
 			}
 		}else if (message->command == CMD_CONFIG_ZIGBEE_GATEWAY){
 			if (zigbee_network_cmd_handle(&cmdDesc,&message->NwkMgmt)){
@@ -859,7 +859,7 @@ void GatewayManager_HandleNetworkRequest(void *msg)
 				cmdDesc.command = message->command;
 				cmdDesc.sourceAddr = message->sourceAddr;
 				cmdDesc.cmd_response_callback = zigbee_cmd_callback;//
-				xQueueSend( zigbee_queue_cmd_in, &cmdDesc, 0 );
+				xQueueSend( zigbeeQueueCmdIn, &cmdDesc, 0 );
 			}
 		}
 		break;
@@ -953,7 +953,7 @@ void gateway_info_rsp_callback(Cmd_Response_t *resp, struct sockaddr addr,networ
 	}
 }
 
-void gateway_manager_info_query(info_query_t infoQuery)
+void GatewayManager_InfoQuery(InfoQuery_t infoQuery)
 {
 	//Read zigBee gateway info
 	AppCmdDescriptor_t cmdDesc;
@@ -961,25 +961,25 @@ void gateway_manager_info_query(info_query_t infoQuery)
 
 	//query gateway info
 	if (infoQuery.query_type & QUERY_TYPE_GATEWAY){
-		zigbee_gateway_query_gateway_info(&cmdDesc);
-		zigbee_cmd_service_process_packet(&cmdDesc);
+		ZigbeeGateway_QueryGatewayInfo(&cmdDesc);
+		ZigbeeCmdService_ProcessPacket(&cmdDesc);
 	}
 
 	//query device list
 	if (infoQuery.query_type & QUERY_TYPE_DEVICE_LIST){
-		zigbee_ognz_query_device_group_scene_list(&cmdDesc,OGNZ_MGMT_GET_DEVICE_LIST);
-		zigbee_cmd_service_process_packet(&cmdDesc);
+		ZigbeeOgnz_QueryDeviceGroupSceneList(&cmdDesc,OGNZ_MGMT_GET_DEVICE_LIST);
+		ZigbeeCmdService_ProcessPacket(&cmdDesc);
 	}
 
 	//query group list
 	if (infoQuery.query_type & QUERY_TYPE_GROUP_LIST){
-		zigbee_ognz_query_device_group_scene_list(&cmdDesc,OGNZ_MGMT_GET_GROUP_LIST);
-		zigbee_cmd_service_process_packet(&cmdDesc);
+		ZigbeeOgnz_QueryDeviceGroupSceneList(&cmdDesc,OGNZ_MGMT_GET_GROUP_LIST);
+		ZigbeeCmdService_ProcessPacket(&cmdDesc);
 	}
 	//query scene list
 	if (infoQuery.query_type & QUERY_TYPE_SCENE_LIST){
-		zigbee_ognz_query_device_group_scene_list(&cmdDesc,OGNZ_MGMT_GET_SCENE_LIST);
-		zigbee_cmd_service_process_packet(&cmdDesc);
+		ZigbeeOgnz_QueryDeviceGroupSceneList(&cmdDesc,OGNZ_MGMT_GET_SCENE_LIST);
+		ZigbeeCmdService_ProcessPacket(&cmdDesc);
 	}
 
 	//query device info
@@ -988,8 +988,8 @@ void gateway_manager_info_query(info_query_t infoQuery)
 		for(uint8_t i = 0; i < MAXIMUM_DEVICES_NUM; i++){
 			devicelist = g_zigbee_ognz_info.device_list.deviceList[i/64];
 			if( devicelist & ((uint64_t)1 << (i%64)) ){
-				zigbee_ognz_query_device_group_scene_info(&cmdDesc,OGNZ_MGMT_GET_DEVICE_INFO,i);
-				zigbee_cmd_service_process_packet(&cmdDesc);
+				ZigbeeOgnz_QueryDeviceGroupSceneInfo(&cmdDesc,OGNZ_MGMT_GET_DEVICE_INFO,i);
+				ZigbeeCmdService_ProcessPacket(&cmdDesc);
 			}
 		}
 	}
@@ -998,8 +998,8 @@ void gateway_manager_info_query(info_query_t infoQuery)
 	if (infoQuery.query_type & QUERY_TYPE_GROUP_INFO){
 		for(uint8_t i = 0; i < MAXIMUM_GROUPS_NUM; i++){
 			if(g_zigbee_ognz_info.group_list.list & ((uint32_t)1 << (i%32)) ){
-				zigbee_ognz_query_device_group_scene_info(&cmdDesc,OGNZ_MGMT_GET_GROUP_INFO,i);
-				zigbee_cmd_service_process_packet(&cmdDesc);
+				ZigbeeOgnz_QueryDeviceGroupSceneInfo(&cmdDesc,OGNZ_MGMT_GET_GROUP_INFO,i);
+				ZigbeeCmdService_ProcessPacket(&cmdDesc);
 			}
 		}
 	}
@@ -1008,15 +1008,15 @@ void gateway_manager_info_query(info_query_t infoQuery)
 	if (infoQuery.query_type & QUERY_TYPE_SCEN_INFO){
 		for(uint8_t i = 0; i < MAXIMUM_SCENES_NUM; i++){
 			if(g_zigbee_ognz_info.scene_list.list & ((uint32_t)1 << (i%32)) ){
-				zigbee_ognz_query_device_group_scene_info(&cmdDesc,OGNZ_MGMT_GET_SCENE_INFO,i);
-				zigbee_cmd_service_process_packet(&cmdDesc);
+				ZigbeeOgnz_QueryDeviceGroupSceneInfo(&cmdDesc,OGNZ_MGMT_GET_SCENE_INFO,i);
+				ZigbeeCmdService_ProcessPacket(&cmdDesc);
 			}
 		}
 	}
 
 	//query device state
 	if (infoQuery.query_type & QUERY_TYPE_DEVICE_STATE){
-		zigbee_device_state_query(&cmdDesc);
+		zigbeeDeviceStateQuery(&cmdDesc);
 	}
 }
 
@@ -1024,12 +1024,12 @@ void gateway_manager_info_query(info_query_t infoQuery)
 void gateway_manager_task(void *pvParameter)
 {
 	struct sockaddr sourceAddr;
-	info_query_t infoQuery;
+	InfoQuery_t infoQuery;
 	infoQuery.query_type = QUERY_OGNZ_STRUCTURE;
-	gateway_manager_info_query(infoQuery);
+	GatewayManager_InfoQuery(infoQuery);
 	while(1){
-		network_message_t cmdOutDesc;
-		if (xQueueReceive(zigbee_queue_cmd_out, &cmdOutDesc, 0)){
+		NetworkMessage_t cmdOutDesc;
+		if (xQueueReceive(zigbeeQueueCmdOut, &cmdOutDesc, 0)){
 			sourceAddr = cmdOutDesc.sourceAddr;
 			if (local_udp_socket >= 0){
 				if (sendto(local_udp_socket,(uint8_t *)&cmdOutDesc, cmdOutDesc.contentLength + NETWORK_MESSAGE_LENGTH, 0, &sourceAddr, sizeof(struct sockaddr)) < 0){
@@ -1038,24 +1038,24 @@ void gateway_manager_task(void *pvParameter)
 			}
 		}
 		AppCmdDescriptor_t cmdInDesc;
-		if(xQueueReceive(zigbee_queue_cmd_in, &cmdInDesc, 0)){
+		if(xQueueReceive(zigbeeQueueCmdIn, &cmdInDesc, 0)){
 			gpio_set_level(GPIO_NUM_2, 1);
-			zigbee_cmd_service_process_packet(&cmdInDesc);
+			ZigbeeCmdService_ProcessPacket(&cmdInDesc);
 		}
 
-		if(xQueueReceive(zigbee_info_queue_query_start, &infoQuery, 0)){
-			gateway_manager_info_query(infoQuery);
+		if(xQueueReceive(zigbeeInfoQueueQueryStart, &infoQuery, 0)){
+			GatewayManager_InfoQuery(infoQuery);
 		}
 
 		vTaskDelay(1/portTICK_PERIOD_MS);
 	}
 }
 
-void device_info_query_callback( TimerHandle_t xTimer )
+void deviceInfoQueryCallback( TimerHandle_t xTimer )
 {
-	info_query_t infoQuery;
+	InfoQuery_t infoQuery;
 	infoQuery.query_type = QUERY_TYPE_DEVICE_STATE,
-	xQueueSend( zigbee_info_queue_query_start, &infoQuery, 0);
+	xQueueSend( zigbeeInfoQueueQueryStart, &infoQuery, 0);
 }
 
 
@@ -1063,13 +1063,13 @@ void device_info_query_callback( TimerHandle_t xTimer )
 
 void GatewayManager_Init(void)
 {
-	zigbee_ognz_info_init();
-	zigbee_cmd_service_init();
-	zigbee_queue_cmd_in  = xQueueCreate( 6, sizeof(AppCmdDescriptor_t) );
-	zigbee_queue_cmd_out = xQueueCreate( 3, sizeof(network_message_t) );
-	zigbee_info_queue_query_start = xQueueCreate( 1, sizeof(info_query_t) );
-	zigbee_info_query_timer = xTimerCreate( "ZDSQ_timer", DEVICE_INFO_QUERY_INTERVAL/portTICK_PERIOD_MS, pdTRUE, 0, device_info_query_callback );
-	xTimerStart(zigbee_info_query_timer,0);
+	ZigbeeOgnzInfo_Init();
+	ZigbeeCmdService_Init();
+	zigbeeQueueCmdIn  = xQueueCreate( 6, sizeof(AppCmdDescriptor_t) );
+	zigbeeQueueCmdOut = xQueueCreate( 3, sizeof(NetworkMessage_t) );
+	zigbeeInfoQueueQueryStart = xQueueCreate( 1, sizeof(InfoQuery_t) );
+	zigbeeInfoQueryTimer = xTimerCreate( "ZDSQ_timer", DEVICE_INFO_QUERY_INTERVAL/portTICK_PERIOD_MS, pdTRUE, 0, deviceInfoQueryCallback );
+	xTimerStart(zigbeeInfoQueryTimer,0);
 	xTaskCreate(&gateway_manager_task, "GW_DEV_MT", 4096, NULL, tskIDLE_PRIORITY+3, NULL);
 }
 
