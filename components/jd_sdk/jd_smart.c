@@ -31,7 +31,7 @@ TimerHandle_t jd_heart_beat_timer = NULL;
 int32_t g_remote_server_ip = 0;
 uint32_t dns_is_connecting = false;
 
-extern wifi_status_t g_wifi_status;
+extern Wifi_status_t gWifiStatus;
 
 void jd_smart_task(void *pvParameter);
 
@@ -72,14 +72,14 @@ void jd_smart_task(void *pvParameter)
     xTaskCreate(&vTaskNetworkUdpEvent, "JD_UDP", 2048, NULL, 6, NULL);
     while (1) {
 
-        if (g_wifi_status == WIFI_STATUS_GOT_IP){
+        if (gWifiStatus == WIFI_STATUS_GOT_IP){
 			if(g_remote_server_ip == 0 && dns_is_connecting == false){
 				dns_is_connecting = true;
 				dns_gethostbyname((char*)(MAIN_HOST_NAME), &addr,dns_callback, NULL);
 			}
         }
 
-        if ( g_wifi_status == WIFI_STATUS_GOT_IP){
+        if ( gWifiStatus == WIFI_STATUS_GOT_IP){
         	if (udp_socket == -1){
 				memset(&server_addr, 0, sizeof(server_addr));
 				server_addr.sin_family = AF_INET;
@@ -93,7 +93,7 @@ void jd_smart_task(void *pvParameter)
 				}
         	}
         }
-        if ( g_wifi_status == WIFI_STATUS_GOT_IP && g_remote_server_ip != 0){
+        if ( gWifiStatus == WIFI_STATUS_GOT_IP && g_remote_server_ip != 0){
 			if (tcp_client_socket == -1){
 				tcp_client_socket = socket(AF_INET,SOCK_STREAM,IPPROTO_TCP);
 				memset(&server_addr, 0, sizeof(server_addr));
@@ -113,7 +113,7 @@ void jd_smart_task(void *pvParameter)
 				}
 			}
         }
-        if (g_wifi_status != WIFI_STATUS_GOT_IP){
+        if (gWifiStatus != WIFI_STATUS_GOT_IP){
         	if (udp_socket != -1){
 				close(udp_socket);
 				udp_socket = -1;

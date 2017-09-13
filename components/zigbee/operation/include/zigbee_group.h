@@ -10,6 +10,6 @@
 #define GROUP_H_
 #include "cmd_descriptor.h"
 
-void zigbee_add_remove_group(appCmdDescriptor_t *cmdDesc,uint8_t address,uint8_t endpoint,uint16_t groupAddress, uint8_t command);
+void zigbee_add_remove_group(AppCmdDescriptor_t *cmdDesc,uint8_t address,uint8_t endpoint,uint16_t groupAddress, uint8_t command);
 
 #endif /* GROUP_H_ */

@@ -11,7 +11,7 @@
 #define ZIGBEE_CMD_RESULT_QUEUE_LEN			1
 
 void zigbee_cmd_service_init(void);
-bool zigbee_cmd_service_process_packet(appCmdDescriptor_t* pCmdDesc);
+bool zigbee_cmd_service_process_packet(AppCmdDescriptor_t* pCmdDesc);
 
 
 

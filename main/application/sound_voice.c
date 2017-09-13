@@ -153,7 +153,7 @@ void sound_voice_task(void *pvParameter)
     }
 }
 
-void Sound_Voice_Init(void)
+void SoundVoice_Init(void)
 {
     WM8978_Init();
     i2s_init();

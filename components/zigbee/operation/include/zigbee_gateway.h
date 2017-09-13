@@ -4,7 +4,7 @@
 #include "cmd_descriptor.h"
 
 
-void zigbee_gateway_query_gateway_info(appCmdDescriptor_t *cmdDesc);
+void zigbee_gateway_query_gateway_info(AppCmdDescriptor_t *cmdDesc);
 
 
 

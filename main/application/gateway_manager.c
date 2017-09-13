@@ -585,7 +585,7 @@ bool isQuryableDevice(uint16_t deviceId)
 	return false;
 }
 
-bool push_info_query_to_queue(appCmdDescriptor_t *cmdDesc,device_info_t *deviceInfo)
+bool push_info_query_to_queue(AppCmdDescriptor_t *cmdDesc,device_info_t *deviceInfo)
 {
 	int32_t queueAvailableCount = uxQueueSpacesAvailable(zigbee_queue_cmd_in);
 
@@ -654,7 +654,7 @@ bool push_info_query_to_queue(appCmdDescriptor_t *cmdDesc,device_info_t *deviceI
 	return result;
 }
 
-void zigbee_device_state_query(appCmdDescriptor_t *cmdDesc)
+void zigbee_device_state_query(AppCmdDescriptor_t *cmdDesc)
 {
 	static uint8_t nodeIndex = 0;
 	zigbee_node_info_t *pNode = NULL;
@@ -686,7 +686,7 @@ void zigbee_cmd_callback(Cmd_Response_t *resp, struct sockaddr addr,network_head
 		return;
 	}
 	// need to feedback
-	appCmdDescriptor_t *cmdDesc = (appCmdDescriptor_t *)resp->responsePayload;
+	AppCmdDescriptor_t *cmdDesc = (AppCmdDescriptor_t *)resp->responsePayload;
 	network_message_t message;
 	memcpy(&message.networkHeader,&networkHeader,sizeof(network_header_t));
 	message.networkHeader.messageType = NETWORK_MSG_TYPE_NON;
@@ -716,7 +716,7 @@ void zigbee_cmd_callback(Cmd_Response_t *resp, struct sockaddr addr,network_head
 	}
 }
 
-bool zigbee_ctrl_cmd_handle(appCmdDescriptor_t *cmdDesc,DeviceOprt_t *deviceCtrl)
+bool zigbee_ctrl_cmd_handle(AppCmdDescriptor_t *cmdDesc,DeviceOprt_t *deviceCtrl)
 {
 	bool validCmd = true;
 	if (deviceCtrl->clusterId == ONOFF_CLUSTER_ID){
@@ -756,7 +756,7 @@ bool zigbee_ctrl_cmd_handle(appCmdDescriptor_t *cmdDesc,DeviceOprt_t *deviceCtrl
 	return validCmd;
 }
 
-bool zigbee_config_cmd_handle(appCmdDescriptor_t *cmdDesc,GroupSceneMgmt_t *groupSceneOpt)
+bool zigbee_config_cmd_handle(AppCmdDescriptor_t *cmdDesc,GroupSceneMgmt_t *groupSceneOpt)
 {
 	bool validCmd = true;
 	if (groupSceneOpt->clusterId == GROUPS_CLUSTER_ID){
@@ -793,7 +793,7 @@ bool zigbee_config_cmd_handle(appCmdDescriptor_t *cmdDesc,GroupSceneMgmt_t *grou
 	return validCmd;
 }
 
-bool zigbee_network_cmd_handle(appCmdDescriptor_t *cmdDesc,NwkMgmt_t *nwkmgnt)
+bool zigbee_network_cmd_handle(AppCmdDescriptor_t *cmdDesc,NwkMgmt_t *nwkmgnt)
 {
 	bool validCmd = true;
 	if (nwkmgnt->commandId == NWK_MGMT_RST_GATEWAY_TO_FN){
@@ -813,7 +813,7 @@ bool zigbee_network_cmd_handle(appCmdDescriptor_t *cmdDesc,NwkMgmt_t *nwkmgnt)
 void GatewayManager_HandleNetworkRequest(void *msg)
 {
 	network_message_t *message = (network_message_t *)msg;
-	appCmdDescriptor_t cmdDesc;
+	AppCmdDescriptor_t cmdDesc;
 
 	IoT_DEBUG(LWIP_DBG | IoT_DBG_WARNING,("GET: messageType:%02x,packTypeId:%02x\r\n",message->networkHeader.messageType, message->packTypeId));
 	switch(message->packTypeId){
@@ -956,7 +956,7 @@ void gateway_info_rsp_callback(Cmd_Response_t *resp, struct sockaddr addr,networ
 void gateway_manager_info_query(info_query_t infoQuery)
 {
 	//Read zigBee gateway info
-	appCmdDescriptor_t cmdDesc;
+	AppCmdDescriptor_t cmdDesc;
 	cmdDesc.cmd_response_callback = gateway_info_rsp_callback;
 
 	//query gateway info
@@ -1037,7 +1037,7 @@ void gateway_manager_task(void *pvParameter)
 				}
 			}
 		}
-		appCmdDescriptor_t cmdInDesc;
+		AppCmdDescriptor_t cmdInDesc;
 		if(xQueueReceive(zigbee_queue_cmd_in, &cmdInDesc, 0)){
 			gpio_set_level(GPIO_NUM_2, 1);
 			zigbee_cmd_service_process_packet(&cmdInDesc);
@@ -1065,7 +1065,7 @@ void GatewayManager_Init(void)
 {
 	zigbee_ognz_info_init();
 	zigbee_cmd_service_init();
-	zigbee_queue_cmd_in  = xQueueCreate( 6, sizeof(appCmdDescriptor_t) );
+	zigbee_queue_cmd_in  = xQueueCreate( 6, sizeof(AppCmdDescriptor_t) );
 	zigbee_queue_cmd_out = xQueueCreate( 3, sizeof(network_message_t) );
 	zigbee_info_queue_query_start = xQueueCreate( 1, sizeof(info_query_t) );
 	zigbee_info_query_timer = xTimerCreate( "ZDSQ_timer", DEVICE_INFO_QUERY_INTERVAL/portTICK_PERIOD_MS, pdTRUE, 0, device_info_query_callback );

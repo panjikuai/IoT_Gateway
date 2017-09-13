@@ -8,7 +8,7 @@
 //#define ZCL_SCENES_CLUSTER_REMOVE_SCENE_COMMAND_ID         0x02
 //#define ZCL_SCENES_CLUSTER_REMOVE_ALL_SCENES_COMMAND_ID    0x03
 //#define ZCL_SCENES_CLUSTER_STORE_SCENE_COMMAND_ID          0x04
-void zigbee_scene_add_remove_store_scene(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t command,uint16_t groupAddress, uint8_t scene, uint16_t transitionTime)
+void zigbee_scene_add_remove_store_scene(AppCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t command,uint16_t groupAddress, uint8_t scene, uint16_t transitionTime)
 {
 	cmdDesc->packType = PACK_TYPE_DEVICE_GROUP_SCENE_MANAGEMENT;
 	cmdDesc->GroupSceneMgmt.clusterId = SCENES_CLUSTER_ID;
@@ -34,7 +34,7 @@ void zigbee_scene_add_remove_store_scene(appCmdDescriptor_t *cmdDesc,APS_AddrMod
 	cmdDesc->timeout = SCENE_OPT_TIMEOUT;
 }
 
-void zigbee_scene_enhanced_add_scene(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint16_t groupAddress, uint8_t scene, uint16_t transitionTime,
+void zigbee_scene_enhanced_add_scene(AppCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint16_t groupAddress, uint8_t scene, uint16_t transitionTime,
 		uint8_t onoff, uint8_t level, uint16_t x, uint16_t y, uint16_t enhanceHue, uint8_t saturation)
 {
 	cmdDesc->packType = PACK_TYPE_DEVICE_GROUP_SCENE_MANAGEMENT;

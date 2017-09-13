@@ -19,7 +19,7 @@
 #include "iot_debug.h"
 
 
-extern wifi_status_t g_wifi_status;
+extern Wifi_status_t gWifiStatus;
 int local_udp_socket = -1;
 uint8_t udp_recv_buf[RX_MAX_BUFFER_SIZE + SOCKET_ADDR_MAX_SIZE];
 uint8_t udp_send_Buff[SEND_MAX_BUFF_SIZE+ 20 ];
@@ -128,7 +128,7 @@ void networkMaintainTask(void *pvParameter)
 {
 	while(1){
 
-		if (g_wifi_status == WIFI_STATUS_GOT_IP && local_udp_socket == -1){
+		if (gWifiStatus == WIFI_STATUS_GOT_IP && local_udp_socket == -1){
 			struct sockaddr_in server_addr;
 			memset(&server_addr, 0, sizeof(server_addr));
 			server_addr.sin_family = AF_INET;
@@ -196,7 +196,7 @@ void deviceInfoReportTimer_callback( TimerHandle_t xTimer )
 {
 	static uint8_t reportCount = 0;
 	network_message_t message;
-	if (g_wifi_status == WIFI_STATUS_GOT_IP && local_udp_socket != -1){
+	if (gWifiStatus == WIFI_STATUS_GOT_IP && local_udp_socket != -1){
 		load_report_info(&message);
 		xQueueSend(network_in_queue, &message, 0);// Add buff to Queue
 		reportCount++;

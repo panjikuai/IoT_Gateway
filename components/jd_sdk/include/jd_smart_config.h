@@ -17,7 +17,7 @@ typedef enum {
 	WIFI_STATUS_CONNECTED_AP,
 	WIFI_STATUS_DISCONNECTED_AP,
 	WIFI_STATUS_GOT_IP,
-}wifi_status_t;
+}Wifi_status_t;
 
 typedef void(*jd_sc_callback_t)(uint8_t status, void *pdata);
 

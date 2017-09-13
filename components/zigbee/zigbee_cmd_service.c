@@ -65,7 +65,7 @@ bool check_report_packet(uint8_t *packet_buf, uint8_t packet_size) //sensor repo
 }
 
 /* check header, length, crc of received packet */
-bool check_response_packet(appCmdDescriptor_t *pCmdDesc,Cmd_Response_t *rsp)
+bool check_response_packet(AppCmdDescriptor_t *pCmdDesc,Cmd_Response_t *rsp)
 {
 	rsp->status = COMM_FALSE;
 	bool isResponsePack = true;
@@ -143,7 +143,7 @@ void zigbee_data_recv_task(void *pvParameter)
 	uart_event_t event;
 	int32_t  rx_length;
 	Cmd_Response_t resp;
-	appCmdDescriptor_t *pCmdDesc;
+	AppCmdDescriptor_t *pCmdDesc;
 	uint8_t *pbuf = NULL;
 	uint8_t pkt_len;
 
@@ -195,7 +195,7 @@ void zigbee_data_recv_task(void *pvParameter)
 }
 
 /* generate zigbee packet */
-uint8_t generate_packet(appCmdDescriptor_t* pCmdDesc)
+uint8_t generate_packet(AppCmdDescriptor_t* pCmdDesc)
 {
 	uint8_t length = HEAD_SIZE_GENERIC_HEADER + pCmdDesc->length + 1;
 	if (length > MAX_PAYLOAD_SIZE){
@@ -210,12 +210,12 @@ uint8_t generate_packet(appCmdDescriptor_t* pCmdDesc)
 
 
 /* send packet to zigbee serial send task and wait for result */
-bool zigbee_cmd_service_process_packet(appCmdDescriptor_t* pCmdDesc)
+bool zigbee_cmd_service_process_packet(AppCmdDescriptor_t* pCmdDesc)
 {
 	uint8_t packet_len;
 	uint8_t result;
 	uint8_t retry_cnt=0;
-	appCmdDescriptor_t *pCmd;
+	AppCmdDescriptor_t *pCmd;
 	Cmd_Response_t resp;
 	packet_len = generate_packet(pCmdDesc);
 	if (packet_len == 0){

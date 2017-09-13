@@ -6,7 +6,7 @@
 //ZCL_GROUPS_CLUSTER_ADD_GROUP_COMMAND_ID;
 //ZCL_GROUPS_CLUSTER_REMOVE_GROUP_COMMAND_ID;
 //ZCL_GROUPS_CLUSTER_REMOVE_ALL_GROUPS_COMMAND_ID "groupAddress is invalid"
-void zigbee_add_remove_group(appCmdDescriptor_t *cmdDesc,uint8_t address,uint8_t endpoint,uint16_t groupAddress, uint8_t command)
+void zigbee_add_remove_group(AppCmdDescriptor_t *cmdDesc,uint8_t address,uint8_t endpoint,uint16_t groupAddress, uint8_t command)
 {
 	cmdDesc->packType = PACK_TYPE_DEVICE_GROUP_SCENE_MANAGEMENT;
 	cmdDesc->GroupSceneMgmt.clusterId = GROUPS_CLUSTER_ID;

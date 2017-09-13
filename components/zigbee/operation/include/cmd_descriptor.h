@@ -679,7 +679,7 @@ typedef struct PACK{
 	uint8_t 	        packTypeId;
 	uint8_t 	        command;
 	void (*cmd_response_callback)(Cmd_Response_t *resp, struct sockaddr sourceAddr,network_header_t networkHeader,uint8_t packTypeId, uint8_t command);
-}appCmdDescriptor_t;
+}AppCmdDescriptor_t;
 
 END_PACK
 #endif /* CMD_DESCRIPTOR_H_ */

@@ -42,7 +42,7 @@ int32_t apps_do_recipe(void *command, uint16_t len)
 
 int32_t apps_do_ctrl(void *command, uint16_t len)
 {
-	appCmdDescriptor_t cmdDesc;
+	AppCmdDescriptor_t cmdDesc;
 
     uint16_t transTime = 0;
     if(len == 0) {

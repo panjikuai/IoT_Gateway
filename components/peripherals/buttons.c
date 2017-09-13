@@ -52,7 +52,7 @@ void button_scan_timer_callback( TimerHandle_t xTimer )
 	}
 }
 
-void button_init(button_short_press_callback_t short_cb, button_long_press_callback_t long_cb)
+void Button_init(button_short_press_callback_t short_cb, button_long_press_callback_t long_cb)
 {
 	gpio_config_t io_conf;
 
