@@ -4,7 +4,6 @@
 #include "driver/gpio.h"
 #include "driver/rtc_io.h"
 
-
 #include "buttons.h"
 
 #define ESP_INTR_FLAG_DEFAULT 0
