@@ -35,6 +35,8 @@
 
 #include "a2dp.h"
 
+#include "ledDisplay.h"
+
 WiFiConfigParam_t gWifiParam;
 Wifi_status_t gWifiStatus = WIFI_STATUS_WAIT;
 
@@ -63,7 +65,7 @@ esp_err_t event_handler(void *ctx, system_event_t *event)
         break;
     case SYSTEM_EVENT_STA_CONNECTED:
     	gWifiStatus = WIFI_STATUS_CONNECTED_AP;
-    	gpio_set_level(GPIO_NUM_2, 1);
+    	// gpio_set_level(GPIO_NUM_2, 1);
     	break;
     case SYSTEM_EVENT_STA_GOT_IP:
 	{
@@ -131,17 +133,24 @@ void systemTimerCallback( TimerHandle_t xTimer )
 
 	if (gWifiStatus != WIFI_STATUS_CONNECTED_AP && gWifiStatus != WIFI_STATUS_GOT_IP){
 		state = !state;
-		gpio_set_level(GPIO_NUM_2, state);
+		// gpio_set_level(GPIO_NUM_2, state);
 	}else{
 		//IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO, ("system timer\n") );
 	}
 }
 
-void reloadKeyPressed(void)
+void keyShortPressedHandle(ButtonValue_t key)
 {
-	WiFiConfigParam_t param;
-	memset(&param, 0, sizeof(WiFiConfigParam_t));
-	xQueueSend( wifiParamSetQueue, &param, 10 );
+
+}
+
+void keyLongPressedHandle(ButtonValue_t key)
+{
+	if (key == BUTTON_RELOAD){
+		WiFiConfigParam_t param;
+		memset(&param, 0, sizeof(WiFiConfigParam_t));
+		xQueueSend( wifiParamSetQueue, &param, 10 );
+	}
 }
 
 #define A2DP 1
@@ -165,8 +174,12 @@ void app_main(void)
 	DebugLog_Init();
 #endif
 
-    gpio_set_direction(GPIO_NUM_2, GPIO_MODE_OUTPUT);
-    Button_init(NULL, reloadKeyPressed);
+	LedDisplay_Init();
+	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_RED, 	254, 254,500);
+	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_GREEN,254, 254,500);
+	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 254, 254,500);
+    // gpio_set_direction(GPIO_NUM_2, GPIO_MODE_OUTPUT);
+    Button_KeyEventInit(keyShortPressedHandle, keyLongPressedHandle);
 	
 	systemTimer = xTimerCreate("SYS_Timer", 500 / portTICK_PERIOD_MS, pdTRUE, 0, systemTimerCallback );
 	xTimerStart(systemTimer,0);

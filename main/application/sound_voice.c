@@ -79,10 +79,10 @@ void i2s_init(void)
         .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1                                //Interrupt level 1
     };
     i2s_pin_config_t pin_config = {
-        .bck_io_num = 22,
-        .ws_io_num = 23,
-        .data_out_num = 5,
-        .data_in_num = -1                                                       //Not used
+        .bck_io_num     = 14,//22,
+        .ws_io_num      = 12,//23,
+        .data_out_num   = 27,//5,
+        .data_in_num    = -1 //26                                                      //Not used
     };
 
     i2s_driver_install(I2S_NUM, &i2s_config, 0, NULL);
