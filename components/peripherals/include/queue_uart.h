@@ -10,9 +10,9 @@
 #define RX_BUFF_SIZE (256)
 #define TX_BUFF_SIZE (256)
 
-void queue_uart_init(QueueHandle_t *uart_queue);
-int queue_uart_send_packet(uint8_t *buff, uint8_t length);
-int queue_uart_read_packet(uint8_t *buff);
+void QueueUart_Init(QueueHandle_t *uart_queue);
+int QueueUart_SendPacket(uint8_t *buff, uint8_t length);
+int QueueUart_ReadPacket(uint8_t *buff);
 
 
 

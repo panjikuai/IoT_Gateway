@@ -12,7 +12,7 @@
 
 void ZigbeeCmdService_Init(void);
 bool ZigbeeCmdService_ProcessPacket(AppCmdDescriptor_t* pCmdDesc);
-
+void ZigbeeCmdService_ResetModule(void);
 
 
 #endif

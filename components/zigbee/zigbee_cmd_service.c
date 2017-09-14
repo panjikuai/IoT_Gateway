@@ -153,7 +153,7 @@ void zigbee_data_recv_task(void *pvParameter)
 	while(1){
 		if (xQueueReceive(uart_queue, (void * )&event, (portTickType)portMAX_DELAY)){
 			if (event.type == UART_DATA || event.type == UART_BUFFER_FULL || event.type == UART_FIFO_OVF){
-				rx_length = queue_uart_read_packet(uart_rx_buff);
+				rx_length = QueueUart_ReadPacket(uart_rx_buff);
 				pbuf = uart_rx_buff;
 				pkt_len = pbuf[2];
 
@@ -224,7 +224,7 @@ bool ZigbeeCmdService_ProcessPacket(AppCmdDescriptor_t* pCmdDesc)
 
 	while(retry_cnt < ZIGBEE_SEND_RETRY_TIMES){
 		xQueueSend(zigbee_cmd_queue, &pCmdDesc,10);
-		if(queue_uart_send_packet(pCmdDesc->payload, packet_len)){
+		if(QueueUart_SendPacket(pCmdDesc->payload, packet_len)){
 			if(xQueueReceive(zigbee_cmd_result_queue, &result, pCmdDesc->timeout)){
 				if(result == COMM_SUCCESS){
 					return true;
@@ -258,9 +258,17 @@ void ZigbeeCmdService_Init(void)
 {
 	zigbee_cmd_queue = xQueueCreate(ZIGBEE_CMD_QUEUE_LEN, sizeof(void *));
 	zigbee_cmd_result_queue = xQueueCreate(ZIGBEE_CMD_RESULT_QUEUE_LEN, sizeof(uint8_t));
-	queue_uart_init(&uart_queue);
+	QueueUart_Init(&uart_queue);
 	xTaskCreate(&zigbee_data_recv_task, "ZB_RECV", 2048, NULL, tskIDLE_PRIORITY+4, NULL);
 }
 
+
+void ZigbeeCmdService_ResetModule(void)
+{
+	gpio_set_level(GPIO_NUM_2, 0);
+	vTaskDelay(10/portTICK_PERIOD_MS);
+	gpio_set_level(GPIO_NUM_2, 1);
+	vTaskDelay(500/portTICK_PERIOD_MS);
+}
 
 

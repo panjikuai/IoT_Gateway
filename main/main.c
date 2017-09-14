@@ -36,6 +36,7 @@
 #include "a2dp.h"
 
 #include "ledDisplay.h"
+#include "ioControl.h"
 
 WiFiConfigParam_t gWifiParam;
 Wifi_status_t gWifiStatus = WIFI_STATUS_WAIT;
@@ -161,6 +162,7 @@ void app_main(void)
 	IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO, ("RAM left %d\n", esp_get_free_heap_size()) );
     ESP_ERROR_CHECK( nvs_flash_init() );
 
+	
 
 	SoundVoice_Init();
 	A2DP_Init();
@@ -174,11 +176,13 @@ void app_main(void)
 	DebugLog_Init();
 #endif
 
+	IoControl_Init();
+
 	LedDisplay_Init();
 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_RED, 	254, 254,500);
 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_GREEN,254, 254,500);
 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 254, 254,500);
-    // gpio_set_direction(GPIO_NUM_2, GPIO_MODE_OUTPUT);
+    
     Button_KeyEventInit(keyShortPressedHandle, keyLongPressedHandle);
 	
 	systemTimer = xTimerCreate("SYS_Timer", 500 / portTICK_PERIOD_MS, pdTRUE, 0, systemTimerCallback );
