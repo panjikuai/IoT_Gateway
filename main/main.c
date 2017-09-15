@@ -44,6 +44,17 @@ Wifi_status_t gWifiStatus = WIFI_STATUS_WAIT;
 TimerHandle_t systemTimer = NULL;
 QueueHandle_t wifiParamSetQueue = NULL;
 
+#define EUTTON_EVENT_TYPE_SHORT_PRESS 0
+#define EUTTON_EVENT_TYPE_LONG_PRESS  1
+
+
+typedef struct{
+	uint16_t type; 	//long press or short press;
+	uint16_t keyValue; 
+}ButtonHandleEvent_t;
+
+QueueHandle_t buttonHandleQueue = NULL;
+
 uint8_t ipaddr[4];
 
 void get_ip_address(uint8_t *ip)
@@ -117,12 +128,45 @@ void cloud_status_call_back(uint8_t status, void *info)
 
 void wifi_Task(void *pvParameter)
 {
+	uint32_t ledStatus = 0;
+
+	ButtonHandleEvent_t event;
+	WiFiConfigParam_t 	param;
 	while(1){
-		WiFiConfigParam_t param;
+		
         if (xQueueReceive( wifiParamSetQueue , &param, 0 ) == pdTRUE){
         	WIFI_SetWifiParam(&param);
         	esp_restart();
-        }
+		}
+		
+		if (xQueueReceive( buttonHandleQueue , &event, 0 ) == pdTRUE){
+			if (event.type == EUTTON_EVENT_TYPE_LONG_PRESS){
+				if (event.keyValue == BUTTON_RELOAD){
+					memset(&param, 0, sizeof(WiFiConfigParam_t));
+					xQueueSend( wifiParamSetQueue, &param, 0 );
+				}
+			}else{
+				if (event.keyValue == BUTTON_FUNC){
+					if (ledStatus == 0){
+						ledStatus = 1;
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_RED, 	254, 254,100);
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_GREEN,254, 254,100);
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 254, 254,100);
+					}else if (ledStatus == 1){
+						ledStatus = 2;
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_GREEN,254, 254,100);
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_BLUE, 254, 254,100);
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_RED,  254, 254,100);
+					}else if (ledStatus == 2){
+						ledStatus = 0;
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_BLUE, 254, 254,100);
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_RED,  254, 254,100);
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_GREEN,254, 254,100);
+					}
+				}
+			}
+		}
+
 		vTaskDelay(50/portTICK_PERIOD_MS);
 		// IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO,("ssid: %s, pwd: %s\r",gWifiParam.ssid,gWifiParam.pwd));
 	}
@@ -163,16 +207,20 @@ void systemTimerCallback( TimerHandle_t xTimer )
 
 void keyShortPressedHandle(ButtonValue_t key)
 {
-
+	ButtonHandleEvent_t event={
+		.type = EUTTON_EVENT_TYPE_SHORT_PRESS,
+		.keyValue = key
+	};
+	xQueueSend( buttonHandleQueue, &event, 0 );
 }
 
 void keyLongPressedHandle(ButtonValue_t key)
 {
-	if (key == BUTTON_RELOAD){
-		WiFiConfigParam_t param;
-		memset(&param, 0, sizeof(WiFiConfigParam_t));
-		xQueueSend( wifiParamSetQueue, &param, 10 );
-	}
+	ButtonHandleEvent_t event={
+		.type = EUTTON_EVENT_TYPE_LONG_PRESS,
+		.keyValue = key
+	};
+	xQueueSend( buttonHandleQueue, &event, 0 );
 }
 
 #define A2DP 1
@@ -182,8 +230,6 @@ void app_main(void)
 {
 	IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO, ("RAM left %d\n", esp_get_free_heap_size()) );
     ESP_ERROR_CHECK( nvs_flash_init() );
-
-	
 
 	SoundVoice_Init();
 	A2DP_Init();
@@ -210,7 +256,9 @@ void app_main(void)
 	systemTimer = xTimerCreate("SYS_Timer", 1000 / portTICK_PERIOD_MS, pdTRUE, 0, systemTimerCallback );
 	xTimerStart(systemTimer,0);
 
-    wifiParamSetQueue = xQueueCreate( 1, sizeof(WiFiConfigParam_t) );
+	wifiParamSetQueue = xQueueCreate( 1, sizeof(WiFiConfigParam_t) );
+	
+	buttonHandleQueue = xQueueCreate( 1, sizeof(ButtonHandleEvent_t) );
 
     if (WIFI_GetWifiParam(&gWifiParam) != ESP_OK){
 		Airkiss_start(smartConfig_callback);

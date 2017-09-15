@@ -2,8 +2,8 @@
 #define BUTTONS_H
 
 typedef enum {
-    BUTTON_FUNC     = 0,
-    BUTTON_RELOAD   = 1
+    BUTTON_RELOAD   = 0,
+    BUTTON_FUNC     = 1
 }ButtonValue_t;
 
 typedef void(*ButtonShortPressCallback_t)(ButtonValue_t value);
