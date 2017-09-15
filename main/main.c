@@ -130,6 +130,7 @@ void wifi_Task(void *pvParameter)
 
 void systemTimerCallback( TimerHandle_t xTimer )
 {
+	static uint8_t count = 0;
 	static uint8_t state = 0;
 
 	if (gWifiStatus != WIFI_STATUS_CONNECTED_AP && gWifiStatus != WIFI_STATUS_GOT_IP){
@@ -138,6 +139,26 @@ void systemTimerCallback( TimerHandle_t xTimer )
 	}else{
 		//IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO, ("system timer\n") );
 	}
+
+
+	if (count == 0){
+		count =1;
+		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_RED, 	254, 254,100);
+		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_GREEN,254, 254,100);
+		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 254, 254,100);
+	}else if (count == 1){
+		count = 2;
+		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_GREEN,254, 254,100);
+		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_BLUE, 254, 254,100);
+		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_RED,  254, 254,100);
+	}else{
+		count = 0;
+		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_BLUE, 254, 254,100);
+		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_RED,  254, 254,100);
+		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_GREEN,254, 254,100);
+	}
+
+
 }
 
 void keyShortPressedHandle(ButtonValue_t key)
@@ -185,7 +206,7 @@ void app_main(void)
     
     Button_KeyEventInit(keyShortPressedHandle, keyLongPressedHandle);
 	
-	systemTimer = xTimerCreate("SYS_Timer", 500 / portTICK_PERIOD_MS, pdTRUE, 0, systemTimerCallback );
+	systemTimer = xTimerCreate("SYS_Timer", 1000 / portTICK_PERIOD_MS, pdTRUE, 0, systemTimerCallback );
 	xTimerStart(systemTimer,0);
 
     wifiParamSetQueue = xQueueCreate( 1, sizeof(WiFiConfigParam_t) );

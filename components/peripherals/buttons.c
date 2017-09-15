@@ -11,7 +11,7 @@
 #define BUTTON_SYSTEM_RELOAD_MAX (5000 / BUTTON_SCAN_INTERVAL)
 
 TimerHandle_t buttonScanTimer = NULL;
-static uint32_t buttonScanCount = 0;
+uint32_t buttonScanCount = 0;
 ButtonShortPressCallback_t shortPressCallback = NULL;
 ButtonLongPressCallback_t  longPressCallback = NULL;
 void buttonScanTimerCallback( TimerHandle_t xTimer );
