@@ -197,6 +197,7 @@ void app_main(void)
 	DebugLog_Init();
 #endif
 
+
 	IoControl_Init();
 
 	LedDisplay_Init();
