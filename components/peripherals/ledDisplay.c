@@ -34,11 +34,11 @@
 #define LEDC_HS_UP_B_GPIO       (16)
 #define LEDC_HS_UP_B_CHANNEL    LEDC_CHANNEL_2
 
-#define LEDC_HS_LEFT_R_GPIO     (34)
+#define LEDC_HS_LEFT_R_GPIO     (13)//(34)
 #define LEDC_HS_LEFT_R_CHANNEL  LEDC_CHANNEL_3
-#define LEDC_HS_LEFT_G_GPIO     (39)
+#define LEDC_HS_LEFT_G_GPIO     (26)//(39)
 #define LEDC_HS_LEFT_G_CHANNEL  LEDC_CHANNEL_4
-#define LEDC_HS_LEFT_B_GPIO     (36)
+#define LEDC_HS_LEFT_B_GPIO     (32)//(36)
 #define LEDC_HS_LEFT_B_CHANNEL  LEDC_CHANNEL_5
 
 #define LEDC_HS_RIGHT_R_GPIO    (5)
