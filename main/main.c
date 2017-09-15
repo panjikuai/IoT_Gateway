@@ -152,7 +152,6 @@ void app_main(void)
 	IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO, ("RAM left %d\n", esp_get_free_heap_size()) );
     ESP_ERROR_CHECK( nvs_flash_init() );
 
-
 	Sound_Voice_Init();
 	A2DP_Init();
 
@@ -164,7 +163,6 @@ void app_main(void)
 #ifdef _IOT_DEBUG_
 	create_debug_semaphore();
 #endif
-
 
     gpio_set_direction(GPIO_NUM_2, GPIO_MODE_OUTPUT);
     button_init(NULL, reload_button_pressed);
@@ -181,7 +179,6 @@ void app_main(void)
 		GatewayManager_Init();
 		NetworkManager_Init();
     }
-	
 
     xTaskCreate(&wifi_Task, "WIFI", 2048, NULL, tskIDLE_PRIORITY+1, NULL);
 }
