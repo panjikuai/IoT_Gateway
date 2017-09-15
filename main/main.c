@@ -165,6 +165,7 @@ void app_main(void)
 	create_debug_semaphore();
 #endif
 
+
     gpio_set_direction(GPIO_NUM_2, GPIO_MODE_OUTPUT);
     button_init(NULL, reload_button_pressed);
 	
