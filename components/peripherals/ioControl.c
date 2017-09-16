@@ -18,8 +18,8 @@ void IoControl_Init(void)
     gpio_set_direction(GPIO_NUM_21, GPIO_MODE_OUTPUT);
 
     // Reset zigbee module
-	gpio_set_level(GPIO_NUM_2, 0);
+	gpio_set_level(GPIO_NUM_21, 0);
 	vTaskDelay(10/portTICK_PERIOD_MS);
-	gpio_set_level(GPIO_NUM_2, 1);
+	gpio_set_level(GPIO_NUM_21, 1);
 	vTaskDelay(500/portTICK_PERIOD_MS);
 }

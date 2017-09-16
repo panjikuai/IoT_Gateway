@@ -77,7 +77,6 @@ esp_err_t event_handler(void *ctx, system_event_t *event)
         break;
     case SYSTEM_EVENT_STA_CONNECTED:
     	gWifiStatus = WIFI_STATUS_CONNECTED_AP;
-    	// gpio_set_level(GPIO_NUM_2, 1);
     	break;
     case SYSTEM_EVENT_STA_GOT_IP:
 	{
@@ -167,7 +166,7 @@ void wifi_Task(void *pvParameter)
 			}
 		}
 
-		vTaskDelay(50/portTICK_PERIOD_MS);
+		vTaskDelay(10/portTICK_PERIOD_MS);
 		// IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO,("ssid: %s, pwd: %s\r",gWifiParam.ssid,gWifiParam.pwd));
 	}
 }
@@ -179,7 +178,6 @@ void systemTimerCallback( TimerHandle_t xTimer )
 
 	if (gWifiStatus != WIFI_STATUS_CONNECTED_AP && gWifiStatus != WIFI_STATUS_GOT_IP){
 		state = !state;
-		// gpio_set_level(GPIO_NUM_2, state);
 	}else{
 		//IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO, ("system timer\n") );
 	}
@@ -187,19 +185,19 @@ void systemTimerCallback( TimerHandle_t xTimer )
 
 	if (count == 0){
 		count =1;
-		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_RED, 	254, 254,100);
-		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_GREEN,254, 254,100);
-		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 254, 254,100);
+		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_RED, 	254, 254,10);
+		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_RED,  254, 254,10);
+		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_RED,  254, 254,10);
 	}else if (count == 1){
 		count = 2;
-		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_GREEN,254, 254,100);
-		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_BLUE, 254, 254,100);
-		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_RED,  254, 254,100);
+		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_GREEN, 254, 254,10);
+		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_GREEN, 254, 254,10);
+		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_GREEN, 254, 254,10);
 	}else{
 		count = 0;
-		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_BLUE, 254, 254,100);
-		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_RED,  254, 254,100);
-		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_GREEN,254, 254,100);
+		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_BLUE, 254, 254,10);
+		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_BLUE, 254, 254,10);
+		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 254, 254,10);
 	}
 
 
@@ -242,8 +240,6 @@ void app_main(void)
 #ifdef _IOT_DEBUG_
 	DebugLog_Init();
 #endif
-
-
 	IoControl_Init();
 
 	LedDisplay_Init();
@@ -257,16 +253,15 @@ void app_main(void)
 	xTimerStart(systemTimer,0);
 
 	wifiParamSetQueue = xQueueCreate( 1, sizeof(WiFiConfigParam_t) );
-	
 	buttonHandleQueue = xQueueCreate( 1, sizeof(ButtonHandleEvent_t) );
 
-    if (WIFI_GetWifiParam(&gWifiParam) != ESP_OK){
-		Airkiss_start(smartConfig_callback);
-    }else{
-    	WIFI_ConnecToTargetAP(&gWifiParam);
-		GatewayManager_Init();
-		NetworkManager_Init();
-	}
+    // if (WIFI_GetWifiParam(&gWifiParam) != ESP_OK){
+	// 	Airkiss_start(smartConfig_callback);
+    // }else{
+    // 	WIFI_ConnecToTargetAP(&gWifiParam);
+	// 	GatewayManager_Init();
+			// NetworkManager_Init();
+	// }
 
     xTaskCreate(&wifi_Task, "WIFI", 2048, NULL, tskIDLE_PRIORITY+1, NULL);
 }

@@ -518,8 +518,6 @@ void device_state_rsp_callback(Cmd_Response_t *resp, struct sockaddr addr,networ
 		return;
 	}
 
-	// gpio_set_level(GPIO_NUM_2, 0);
-
 	uint8_t attributeCount = resp->responsePayload[HEAD_SIZE_GENERIC_HEADER + HEAD_SIZE_DEVICE_STATE];
 	AttributeOprtRspStruct_t *attr;
 	uint8_t size = HEAD_SIZE_GENERIC_HEADER + HEAD_SIZE_DEVICE_STATE + 1;
@@ -1039,7 +1037,6 @@ void gateway_manager_task(void *pvParameter)
 		}
 		AppCmdDescriptor_t cmdInDesc;
 		if(xQueueReceive(zigbeeQueueCmdIn, &cmdInDesc, 0)){
-			// gpio_set_level(GPIO_NUM_2, 1);
 			ZigbeeCmdService_ProcessPacket(&cmdInDesc);
 		}
 
