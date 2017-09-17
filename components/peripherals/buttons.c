@@ -7,7 +7,7 @@
 #include "buttons.h"
 
 #define ESP_INTR_FLAG_DEFAULT 0
-#define BUTTON_SCAN_INTERVAL (50 / portTICK_PERIOD_MS)
+#define BUTTON_SCAN_INTERVAL (10 / portTICK_PERIOD_MS)
 #define BUTTON_SYSTEM_RELOAD_MAX (5000 / BUTTON_SCAN_INTERVAL)
 
 #define BUTTON_MAX_TIME  0xFFFF
@@ -41,7 +41,7 @@ void gpio_isr_handler(void* arg)
 void buttonScanTimerCallback( TimerHandle_t xTimer )
 {
 	uint8_t KeyPressd[BUTTON_NUM] = {false,false};
-	if (rtc_gpio_get_level(GPIO_RELOAD_BUTTON) == 0 ){
+	if (gpio_get_level(GPIO_RELOAD_BUTTON) == 0 ){
 		KeyPressd[BUTTON_RELOAD] = true;
 		if (buttonScanCount[BUTTON_RELOAD] != BUTTON_MAX_TIME){
 			buttonScanCount[BUTTON_RELOAD]++;
@@ -58,11 +58,12 @@ void buttonScanTimerCallback( TimerHandle_t xTimer )
 				shortPressCallback(BUTTON_RELOAD);
 			}
 		}
+		buttonScanCount[BUTTON_RELOAD] = 0;
 	}
 
 
 
-	if (rtc_gpio_get_level(GPIO_FUNCTION_BUTTON) == 0 ){
+	if (gpio_get_level(GPIO_FUNCTION_BUTTON) == 0 ){
 		KeyPressd[BUTTON_FUNC] = true;
 		if (buttonScanCount[BUTTON_FUNC] != BUTTON_MAX_TIME){
 			buttonScanCount[BUTTON_FUNC]++;
@@ -79,10 +80,11 @@ void buttonScanTimerCallback( TimerHandle_t xTimer )
 				shortPressCallback(BUTTON_FUNC);
 			}
 		}
+		buttonScanCount[BUTTON_FUNC] = 0;
 	}
 
 	if (KeyPressd[BUTTON_RELOAD] == false && KeyPressd[BUTTON_FUNC] == false){
-		xTimerStop(buttonScanTimer,0);
+		//xTimerStop(buttonScanTimer,0);
 	}
 
 }
@@ -94,6 +96,7 @@ void Button_KeyEventInit(ButtonShortPressCallback_t short_cb, ButtonLongPressCal
 
 	if (buttonScanTimer == NULL){
 		buttonScanTimer = xTimerCreate( "btnTimer", BUTTON_SCAN_INTERVAL, pdTRUE, 0, buttonScanTimerCallback );
+		xTimerStart(buttonScanTimer,0);
 	}
 	
 	gpio_config_t io_conf = {
@@ -105,13 +108,13 @@ void Button_KeyEventInit(ButtonShortPressCallback_t short_cb, ButtonLongPressCal
 	};
 	gpio_config(&io_conf);
 
-	gpio_set_intr_type(GPIO_FUNCTION_BUTTON, GPIO_INTR_NEGEDGE);				//change gpio interrupt type for one pin
-	gpio_set_intr_type(GPIO_RELOAD_BUTTON, GPIO_INTR_NEGEDGE);					//change gpio interrupt type for one pin
-    gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);							//install gpio isr service
-	gpio_isr_handler_add(GPIO_FUNCTION_BUTTON, gpio_isr_handler, (void*) GPIO_FUNCTION_BUTTON); //hook isr handler for specific gpio pin Function Button
-	gpio_isr_handler_add(GPIO_RELOAD_BUTTON,   gpio_isr_handler, (void*) GPIO_RELOAD_BUTTON); 	//hook isr handler for specific gpio pin Reload Button
-	gpio_intr_enable(GPIO_FUNCTION_BUTTON);
-	gpio_intr_enable(GPIO_RELOAD_BUTTON);
+	// gpio_set_intr_type(GPIO_FUNCTION_BUTTON, GPIO_INTR_NEGEDGE);				//change gpio interrupt type for one pin
+	// gpio_set_intr_type(GPIO_RELOAD_BUTTON, GPIO_INTR_NEGEDGE);					//change gpio interrupt type for one pin
+    // gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);							//install gpio isr service
+	// gpio_isr_handler_add(GPIO_FUNCTION_BUTTON, gpio_isr_handler, (void*) GPIO_FUNCTION_BUTTON); //hook isr handler for specific gpio pin Function Button
+	// gpio_isr_handler_add(GPIO_RELOAD_BUTTON,   gpio_isr_handler, (void*) GPIO_RELOAD_BUTTON); 	//hook isr handler for specific gpio pin Reload Button
+	// gpio_intr_enable(GPIO_FUNCTION_BUTTON);
+	// gpio_intr_enable(GPIO_RELOAD_BUTTON);
 	
 }
 

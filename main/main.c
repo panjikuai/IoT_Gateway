@@ -139,34 +139,74 @@ void wifi_Task(void *pvParameter)
 		}
 		
 		if (xQueueReceive( buttonHandleQueue , &event, 0 ) == pdTRUE){
+			IoT_DEBUG(GENERIC_DBG | IoT_DBG_INFO,("Event:type:%d, key:%d\r\n",event.type,event.keyValue));
 			if (event.type == EUTTON_EVENT_TYPE_LONG_PRESS){
 				if (event.keyValue == BUTTON_RELOAD){
 					memset(&param, 0, sizeof(WiFiConfigParam_t));
 					xQueueSend( wifiParamSetQueue, &param, 0 );
 				}
 			}else{
-				if (event.keyValue == BUTTON_FUNC){
+				if (event.keyValue == BUTTON_FUNC || event.keyValue == BUTTON_RELOAD){
 					if (ledStatus == 0){
 						ledStatus = 1;
 						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_RED, 	254, 254,100);
-						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_GREEN,254, 254,100);
-						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 254, 254,100);
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_RED,	254, 254,100);
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_RED, 	254, 254,100);
 					}else if (ledStatus == 1){
 						ledStatus = 2;
 						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_GREEN,254, 254,100);
-						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_BLUE, 254, 254,100);
-						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_RED,  254, 254,100);
-					}else if (ledStatus == 2){
-						ledStatus = 0;
-						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_BLUE, 254, 254,100);
-						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_RED,  254, 254,100);
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_GREEN,254, 254,100);
 						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_GREEN,254, 254,100);
+					}else if (ledStatus == 2){
+						ledStatus = 3;
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_BLUE, 254, 254,100);
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_BLUE, 254, 254,100);
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 254, 254,100);
+					}else if (ledStatus == 3){
+						ledStatus = 4;
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	65536*1/6, 254, 254,100);
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	65536*1/6, 254, 254,100);
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, 65536*1/6, 254, 254,100);
+					}else if (ledStatus == 4){
+						ledStatus = 5;
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	65536*3/6, 254, 254,100);
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	65536*3/6, 254, 254,100);
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, 65536*3/6, 254, 254,100);
+					}else if (ledStatus == 5){
+						ledStatus = 6;
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	65536*5/6, 254, 254,100);
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	65536*5/6, 254, 254,100);
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, 65536*5/6, 254, 254,100);
+					}else{
+						ledStatus = 0;
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	0, 0, 254,100);
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	0, 0, 254,100);
+						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, 0, 0, 254,100);
 					}
 				}
 			}
 		}
 
-		vTaskDelay(10/portTICK_PERIOD_MS);
+
+		// if (ledStatus == 0){
+		// 	ledStatus = 1;
+		// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_RED, 	254, 254,0);
+		// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_GREEN,254, 254,0);
+		// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 254, 254,0);
+		// }else if (ledStatus == 1){
+		// 	ledStatus = 2;
+		// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_GREEN,254, 254,0);
+		// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_BLUE, 254, 254,0);
+		// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_RED,  254, 254,0);
+		// }else if (ledStatus == 2){
+		// 	ledStatus = 0;
+		// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_BLUE, 254, 254,0);
+		// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_RED,  254, 254,0);
+		// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_GREEN,254, 254,0);
+		// }
+
+
+		vTaskDelay(5/portTICK_PERIOD_MS);
 		// IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO,("ssid: %s, pwd: %s\r",gWifiParam.ssid,gWifiParam.pwd));
 	}
 }
@@ -183,23 +223,22 @@ void systemTimerCallback( TimerHandle_t xTimer )
 	}
 
 
-	if (count == 0){
-		count =1;
-		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_RED, 	254, 254,10);
-		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_RED,  254, 254,10);
-		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_RED,  254, 254,10);
-	}else if (count == 1){
-		count = 2;
-		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_GREEN, 254, 254,10);
-		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_GREEN, 254, 254,10);
-		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_GREEN, 254, 254,10);
-	}else{
-		count = 0;
-		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_BLUE, 254, 254,10);
-		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_BLUE, 254, 254,10);
-		LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 254, 254,10);
-	}
-
+	// if (count == 0){
+	// 	count =1;
+	// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_RED, 	254, 254,10);
+	// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_RED,  254, 254,10);
+	// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_RED,  254, 254,10);
+	// }else if (count == 1){
+	// 	count = 2;
+	// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_GREEN, 254, 254,10);
+	// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_GREEN, 254, 254,10);
+	// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_GREEN, 254, 254,10);
+	// }else{
+	// 	count = 0;
+	// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_BLUE, 254, 254,10);
+	// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_BLUE, 254, 254,10);
+	// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 254, 254,10);
+	// }
 
 }
 
@@ -229,9 +268,6 @@ void app_main(void)
 	IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO, ("RAM left %d\n", esp_get_free_heap_size()) );
     ESP_ERROR_CHECK( nvs_flash_init() );
 
-	SoundVoice_Init();
-	A2DP_Init();
-
     tcpip_adapter_init();
     ESP_ERROR_CHECK( esp_event_loop_init(event_handler, NULL) );
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
@@ -243,25 +279,29 @@ void app_main(void)
 	IoControl_Init();
 
 	LedDisplay_Init();
-	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_RED, 	254, 254,500);
-	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_GREEN,254, 254,500);
-	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 254, 254,500);
+	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_RED, 	254, 0,500);
+	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_GREEN,254, 0,500);
+	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 254, 0,500);
     
-    Button_KeyEventInit(keyShortPressedHandle, keyLongPressedHandle);
+	Button_KeyEventInit(keyShortPressedHandle, keyLongPressedHandle);
+	
+	SoundVoice_Init();
+
+	A2DP_Init();
 	
 	systemTimer = xTimerCreate("SYS_Timer", 1000 / portTICK_PERIOD_MS, pdTRUE, 0, systemTimerCallback );
-	xTimerStart(systemTimer,0);
+	//xTimerStart(systemTimer,0);
 
 	wifiParamSetQueue = xQueueCreate( 1, sizeof(WiFiConfigParam_t) );
 	buttonHandleQueue = xQueueCreate( 1, sizeof(ButtonHandleEvent_t) );
 
-    // if (WIFI_GetWifiParam(&gWifiParam) != ESP_OK){
-	// 	Airkiss_start(smartConfig_callback);
-    // }else{
-    // 	WIFI_ConnecToTargetAP(&gWifiParam);
-	// 	GatewayManager_Init();
-			// NetworkManager_Init();
-	// }
+    if (WIFI_GetWifiParam(&gWifiParam) != ESP_OK){
+		Airkiss_start(smartConfig_callback);
+    }else{
+    	WIFI_ConnecToTargetAP(&gWifiParam);
+		GatewayManager_Init();
+		NetworkManager_Init();
+	}
 
     xTaskCreate(&wifi_Task, "WIFI", 2048, NULL, tskIDLE_PRIORITY+1, NULL);
 }

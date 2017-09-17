@@ -5,20 +5,20 @@
 #include "driver/rtc_io.h"
 #include "driver/ledc.h"
 
+#include "iot_debug.h"
 #include "ledDisplay.h"
 
+#define PWM_BIT_NUM  13
 
-#define PWM_BIT_NUM  LEDC_TIMER_13_BIT
-
-#if PWM_BIT_NUM == LEDC_TIMER_10_BIT
+#if PWM_BIT_NUM == 10
     #define PWM_FULL_SCALE    1023
-#elif PWM_BIT_NUM == LEDC_TIMER_11_BIT
+#elif PWM_BIT_NUM == 11
     #define PWM_FULL_SCALE    2047
-#elif PWM_BIT_NUM == LEDC_TIMER_12_BIT
+#elif PWM_BIT_NUM == 12
     #define PWM_FULL_SCALE    4095
-#elif PWM_BIT_NUM == LEDC_TIMER_13_BIT
+#elif PWM_BIT_NUM == 13
     #define PWM_FULL_SCALE    8191
-#elif PWM_BIT_NUM == LEDC_TIMER_14_BIT
+#elif PWM_BIT_NUM == 14
     #define PWM_FULL_SCALE    16383
 #else
     #define PWM_FULL_SCALE    32767
@@ -114,7 +114,7 @@ Ledc_info_t ledcChannel[LED_CHANNEL_NUM] = {
     {
         .channel   = LEDC_HS_RIGHT_B_CHANNEL,
         .io        = LEDC_HS_RIGHT_B_GPIO,
-        .mode      = LEDC_HS_MODE,
+        .mode      = LEDC_LOW_SPEED_MODE,//LEDC_HS_MODE,
         .timer_idx = LEDC_HS_TIMER1
     },
 
@@ -132,6 +132,7 @@ void LedDisplay_Init(void)
     ledc_timer_config(&ledc_timer);
     //timer1
     ledc_timer.timer_num = LEDC_HS_TIMER1;
+    ledc_timer.speed_mode = LEDC_LOW_SPEED_MODE;
     ledc_timer_config(&ledc_timer);
 
     for (uint32_t i = 0; i < LED_CHANNEL_NUM; i++){
@@ -211,20 +212,32 @@ void LedDisplay_MoveToHueAndSaturationLevel(LightChannel_t lightChannel, uint16_
     
     uint8_t ledIdex = lightChannel*3;
 
-    ledc_set_fade_with_time(ledcChannel[ledIdex].mode, ledcChannel[ledIdex].channel, (int)(r*PWM_FULL_SCALE), transitionTime);
+    //IoT_DEBUG(GENERIC_DBG | IoT_DBG_INFO,("Index: %d, r:%d,g:%d,b:%d\n",ledIdex,(uint32_t)(PWM_FULL_SCALE),(uint32_t)(PWM_FULL_SCALE),(uint32_t)(PWM_FULL_SCALE)));
+
+    ledc_set_fade_with_time(ledcChannel[ledIdex].mode, ledcChannel[ledIdex].channel, (uint32_t)(r*PWM_FULL_SCALE), transitionTime);
     ledc_fade_start(ledcChannel[ledIdex].mode, ledcChannel[ledIdex].channel, LEDC_FADE_NO_WAIT);
 
-    ledIdex++;
-    ledc_set_fade_with_time(ledcChannel[ledIdex].mode, ledcChannel[ledIdex].channel, (int)(g*PWM_FULL_SCALE), transitionTime);
-    ledc_fade_start(ledcChannel[ledIdex].mode, ledcChannel[ledIdex].channel, LEDC_FADE_NO_WAIT);
+    // ledc_set_duty(ledcChannel[ledIdex].mode, ledcChannel[ledIdex].channel, (uint32_t)(r*(float)PWM_FULL_SCALE)*10);
+    // ledc_update_duty(ledcChannel[ledIdex].mode, ledcChannel[ledIdex].channel);
+
 
     ledIdex++;
-    ledc_set_fade_with_time(ledcChannel[ledIdex].mode, ledcChannel[ledIdex].channel, (int)(b*PWM_FULL_SCALE), transitionTime);
+    ledc_set_fade_with_time(ledcChannel[ledIdex].mode, ledcChannel[ledIdex].channel, (uint32_t)(g*PWM_FULL_SCALE), transitionTime);
     ledc_fade_start(ledcChannel[ledIdex].mode, ledcChannel[ledIdex].channel, LEDC_FADE_NO_WAIT);
+
+    // ledc_set_duty(ledcChannel[ledIdex].mode, ledcChannel[ledIdex].channel, (uint32_t)(g*(float)PWM_FULL_SCALE)*10);
+    // ledc_update_duty(ledcChannel[ledIdex].mode, ledcChannel[ledIdex].channel);
+
+    ledIdex++;
+    ledc_set_fade_with_time(ledcChannel[ledIdex].mode, ledcChannel[ledIdex].channel, (uint32_t)(b*PWM_FULL_SCALE), transitionTime);
+    ledc_fade_start(ledcChannel[ledIdex].mode, ledcChannel[ledIdex].channel, LEDC_FADE_NO_WAIT);
+
+    // ledc_set_duty(ledcChannel[ledIdex].mode, ledcChannel[ledIdex].channel, (uint32_t)(b*(float)PWM_FULL_SCALE)*10);
+    // ledc_update_duty(ledcChannel[ledIdex].mode, ledcChannel[ledIdex].channel);
 
 }
 
-
+    
 
 
 
