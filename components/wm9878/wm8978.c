@@ -209,7 +209,7 @@ void WM8978_HPvol_Set(uint8_t voll,uint8_t volr)
 
 void WM8978_SPKvol_Set(uint8_t volx)
 {
-	volx&=0X3F;
+	volx&=0x3F;
 	if(volx==0)volx|=1<<6;									
  	wm_write_register(54,volx);							
 	wm_write_register(55,volx|(1<<8));				
@@ -242,8 +242,8 @@ int WM8978_Init(void)
 	WM8978_ADDA_Cfg(1,0);								
 	WM8978_Input_Cfg(0,0,0);
 	WM8978_Output_Cfg(1,0);
-	WM8978_HPvol_Set(30,30);
-	WM8978_SPKvol_Set(63);
+	WM8978_HPvol_Set(63,63);
+	WM8978_SPKvol_Set(55);
 
 	return 0;
 }

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include "math.h"  
 
 #include <lwip/sockets.h>
 #include "lwip/dns.h"
@@ -38,6 +39,53 @@
 #include "ledDisplay.h"
 #include "ioControl.h"
 
+#include "fft.h"
+
+#define FFT_N  64
+
+QueueHandle_t fftHandleQueue = NULL;
+
+complex fft_result[FFT_N];
+
+#define F_INDEX  26
+
+uint8_t lightColorIndex = 0;
+
+void fft_convert(const uint8_t *data, uint32_t len)
+{
+	if (len < FFT_N*2){
+		return;
+	}
+	uint16_t *buff =  (uint16_t *)data;
+	// uint32_t sum = 0;
+	// for (uint16_t i = 0; i < len/2; i++){
+	// 	sum +=buff[i];
+	// }
+
+	// sum = sum/(len/2);
+
+	// float level = (float)sum/65535.0;
+	// level = level*level*2;
+	
+	// level = level > 1? 1:level;
+	// IoT_DEBUG(GENERIC_DBG | IoT_DBG_INFO,("level: %f\r\n",level));
+
+	// LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, LIGHT_BLUE, 254, (uint8_t)(level*254),1);
+
+	
+	uint16_t step = len/FFT_N;
+	step = step - (step%2);
+	// fill fft input buff
+	for (uint16_t i = 0; i < FFT_N; i++){
+		fft_result[i].real = (float)buff[i*step];
+		fft_result[i].imag = 0;
+	}
+
+	uint16_t event;
+	xQueueSend( fftHandleQueue, &event, 0 );
+
+}
+
 WiFiConfigParam_t gWifiParam;
 Wifi_status_t gWifiStatus = WIFI_STATUS_WAIT;
 
@@ -54,6 +102,7 @@ typedef struct{
 }ButtonHandleEvent_t;
 
 QueueHandle_t buttonHandleQueue = NULL;
+
 
 uint8_t ipaddr[4];
 
@@ -187,23 +236,41 @@ void wifi_Task(void *pvParameter)
 			}
 		}
 
+		uint16_t p;
+		if (xQueueReceive( fftHandleQueue , &p, 0 ) == pdTRUE){
+			fft(FFT_N,fft_result);
+			float level_low = 0;
+			float level_medium = 0;
+			float level_high = 0;
+			for (uint16_t i = 0; i< (FFT_N/2);i++){
+				if (i < (FFT_N/6)){
+					level_low += sqrt( fft_result[i].real * fft_result[i].real+fft_result[i].imag * fft_result[i].imag);
+				}else if (i < (FFT_N/3)){
+					level_medium += sqrt( fft_result[i].real * fft_result[i].real+fft_result[i].imag * fft_result[i].imag);
+				}else{
+					level_high += sqrt( fft_result[i].real * fft_result[i].real+fft_result[i].imag * fft_result[i].imag);
+				}
+			}
 
-		// if (ledStatus == 0){
-		// 	ledStatus = 1;
-		// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_RED, 	254, 254,0);
-		// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_GREEN,254, 254,0);
-		// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 254, 254,0);
-		// }else if (ledStatus == 1){
-		// 	ledStatus = 2;
-		// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_GREEN,254, 254,0);
-		// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_BLUE, 254, 254,0);
-		// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_RED,  254, 254,0);
-		// }else if (ledStatus == 2){
-		// 	ledStatus = 0;
-		// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_BLUE, 254, 254,0);
-		// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_RED,  254, 254,0);
-		// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_GREEN,254, 254,0);
-		// }
+			level_low = level_low/(FFT_N/6);
+			level_medium = level_medium/(FFT_N/6);
+			level_high = level_high/((FFT_N/2)-FFT_N/3);
+
+			//level = level/(FFT_N/2-3);
+			IoT_DEBUG(GENERIC_DBG | IoT_DBG_INFO,("freq: %f, level_high: %f\r\n",44.1*F_INDEX/FFT_N,level_high));
+
+			uint16_t color = LIGHT_BLUE;
+			if (lightColorIndex == 0){
+				color = LIGHT_BLUE;
+			}else if (lightColorIndex == 1){
+				color = LIGHT_GREEN;
+			}else{
+				color = LIGHT_RED;
+			}
+			LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, color, 254, (uint8_t)(level_high*254/65535),20);
+			LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, color, 254, (uint8_t)(level_low*254/65535),20);
+			LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, color, 254, (uint8_t)(level_medium*254/65535),20);
+		}
 
 
 		vTaskDelay(5/portTICK_PERIOD_MS);
@@ -221,25 +288,9 @@ void systemTimerCallback( TimerHandle_t xTimer )
 	}else{
 		//IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO, ("system timer\n") );
 	}
-
-
-	// if (count == 0){
-	// 	count =1;
-	// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_RED, 	254, 254,10);
-	// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_RED,  254, 254,10);
-	// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_RED,  254, 254,10);
-	// }else if (count == 1){
-	// 	count = 2;
-	// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_GREEN, 254, 254,10);
-	// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_GREEN, 254, 254,10);
-	// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_GREEN, 254, 254,10);
-	// }else{
-	// 	count = 0;
-	// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_BLUE, 254, 254,10);
-	// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_BLUE, 254, 254,10);
-	// 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 254, 254,10);
-	// }
-
+	uint32_t randN = rand();
+	lightColorIndex = (uint8_t)(randN % 3);
+	IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO, ("lightColorIndex:%d,randN:%d\n",lightColorIndex,randN) );
 }
 
 void keyShortPressedHandle(ButtonValue_t key)
@@ -284,16 +335,18 @@ void app_main(void)
 	LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 254, 0,500);
     
 	Button_KeyEventInit(keyShortPressedHandle, keyLongPressedHandle);
+
+	systemTimer = xTimerCreate("SYS_Timer", 5000 / portTICK_PERIOD_MS, pdTRUE, 0, systemTimerCallback );
+	xTimerStart(systemTimer,0);
 	
 	SoundVoice_Init();
 
 	A2DP_Init();
-	
-	systemTimer = xTimerCreate("SYS_Timer", 1000 / portTICK_PERIOD_MS, pdTRUE, 0, systemTimerCallback );
-	//xTimerStart(systemTimer,0);
 
 	wifiParamSetQueue = xQueueCreate( 1, sizeof(WiFiConfigParam_t) );
 	buttonHandleQueue = xQueueCreate( 1, sizeof(ButtonHandleEvent_t) );
+
+	fftHandleQueue  = xQueueCreate( 1, sizeof(uint16_t) );
 
     if (WIFI_GetWifiParam(&gWifiParam) != ESP_OK){
 		Airkiss_start(smartConfig_callback);
