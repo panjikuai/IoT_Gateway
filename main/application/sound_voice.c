@@ -72,8 +72,8 @@ void i2s_init(void)
     //2-channels, 16-bit each channel, total buffer is 360*4 = 1440 bytes
     i2s_config_t i2s_config = {
         .mode = I2S_MODE_MASTER | I2S_MODE_TX,                                  // Only TX
-        .sample_rate = 44100,//wave_format->fmt.SampleRate,//SAMPLE_RATE,
-        .bits_per_sample = 16,//wave_format->fmt.BitsPerSample,//16,                                                  //16-bit per channel
+        .sample_rate = wave_format->fmt.SampleRate,//SAMPLE_RATE,
+        .bits_per_sample = wave_format->fmt.BitsPerSample,//16,                                                  //16-bit per channel
         .channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT,//((wave_format->fmt.NumChannels == 2)? I2S_CHANNEL_FMT_RIGHT_LEFT : I2S_CHANNEL_FMT_ALL_RIGHT),                           //2-channels
         .communication_format = I2S_COMM_FORMAT_I2S | I2S_COMM_FORMAT_I2S_MSB,
         .dma_buf_count = 6,
@@ -99,17 +99,30 @@ void soundVoice_task(void *pvParameter)
     uint32_t soundVoiveEvent;
     while(1){
         if (xQueueReceive( soundVoideEventQueue , &soundVoiveEvent, 0 ) == pdTRUE){
-            uint32_t maxBlockSize = wave_format->data_header.Subchunk2Size/(wave_format->fmt.NumChannels * wave_format->fmt.BitsPerSample/8)/BLOCK_SIZE;
+            uint32_t maxBlockSize = wave_format->data_header.Subchunk2Size;
+            maxBlockSize = (maxBlockSize % BLOCK_SIZE)? (maxBlockSize /BLOCK_SIZE +1): (maxBlockSize / BLOCK_SIZE);
             uint32_t blockCount = 0;
-            
+
             IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO,("maxBlockSize: %d, blockCount: %d\r",maxBlockSize,blockCount));
             IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO,("SampleRate: %d, BitsPerSample: %d,NumChannels :%d\n",wave_format->fmt.SampleRate,wave_format->fmt.BitsPerSample,wave_format->fmt.NumChannels ));
 
+            uint8_t *address = wave_format->data;
+            uint32_t blockSize = BLOCK_SIZE;
+
             while(1){
-                i2s_write_bytes(I2S_NUM, (const char *)(wave_format->data + blockCount * BLOCK_SIZE), BLOCK_SIZE, portMAX_DELAY);
+                i2s_write_bytes(I2S_NUM, (const char *)address, blockSize, portMAX_DELAY);
                 blockCount++;
+                address = wave_format->data + blockCount * BLOCK_SIZE;
                 if (blockCount >= maxBlockSize){
+                    uint32_t zero = 0;
+                    i2s_write_bytes(I2S_NUM, (const char *)&zero, sizeof(uint32_t), portMAX_DELAY);
                     break;
+                }else{
+                    if (address > alarm_wav_end){
+                        blockSize = alarm_wav_end +  BLOCK_SIZE - address;
+                    }else{
+                        blockSize = BLOCK_SIZE;
+                    }
                 }
             }
         }
