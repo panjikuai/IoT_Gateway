@@ -29,6 +29,8 @@
 //
 //CommStateMachine_t commStateMachine = COMM_STATE_MACHINE_SOF;
 
+extern QueueHandle_t soundVoideEventQueue;
+
 QueueHandle_t uart_queue;
 uint8_t uart_rx_buff[RX_BUFF_SIZE];
 
@@ -169,6 +171,9 @@ void zigbee_data_recv_task(void *pvParameter)
 					if (check_report_packet(resp.responsePayload, resp.responseLength)){
 						IoT_DEBUG(ZIGBEE_DBG | IoT_DBG_INFO, ("Sensor report packet.\r\n"));
 						//Handler report info
+						uint32_t soundIndex = 0;
+						xQueueSend( soundVoideEventQueue, &soundIndex, 10/portTICK_PERIOD_MS );
+
 					}else{
 						if(xQueuePeek(zigbee_cmd_queue,(void*)&pCmdDesc, 0)){
 							if(check_response_packet(pCmdDesc,&resp)){
