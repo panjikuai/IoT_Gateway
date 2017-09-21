@@ -43,6 +43,8 @@
 
 #define FFT_N  64
 
+extern QueueHandle_t soundVoideEventQueue;
+
 QueueHandle_t fftHandleQueue = NULL;
 
 complex fft_result[FFT_N];
@@ -195,7 +197,7 @@ void wifi_Task(void *pvParameter)
 					xQueueSend( wifiParamSetQueue, &param, 0 );
 				}
 			}else{
-				if (event.keyValue == BUTTON_FUNC || event.keyValue == BUTTON_RELOAD){
+				if (event.keyValue == BUTTON_FUNC){
 					if (ledStatus == 0){
 						ledStatus = 1;
 						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_RED, 	254, 254,100);
@@ -232,6 +234,9 @@ void wifi_Task(void *pvParameter)
 						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	0, 0, 254,100);
 						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, 0, 0, 254,100);
 					}
+				}else if (event.keyValue == BUTTON_RELOAD){
+					uint32_t soundIndex = 0;
+					xQueueSend( soundVoideEventQueue, &soundIndex, 10/portTICK_PERIOD_MS );
 				}
 			}
 		}
@@ -280,7 +285,7 @@ void wifi_Task(void *pvParameter)
 
 void systemTimerCallback( TimerHandle_t xTimer )
 {
-	static uint8_t count = 0;
+	// static uint8_t count = 0;
 	static uint8_t state = 0;
 
 	if (gWifiStatus != WIFI_STATUS_CONNECTED_AP && gWifiStatus != WIFI_STATUS_GOT_IP){
@@ -340,8 +345,7 @@ void app_main(void)
 	xTimerStart(systemTimer,0);
 	
 	SoundVoice_Init();
-
-	A2DP_Init();
+	// A2DP_Init();
 
 	wifiParamSetQueue = xQueueCreate( 1, sizeof(WiFiConfigParam_t) );
 	buttonHandleQueue = xQueueCreate( 1, sizeof(ButtonHandleEvent_t) );
