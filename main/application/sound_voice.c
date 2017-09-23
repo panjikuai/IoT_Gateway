@@ -31,8 +31,8 @@
 extern const uint8_t alarm_wav_start[] asm("_binary_alarm_wav_start");
 extern const uint8_t alarm_wav_end[]   asm("_binary_alarm_wav_end");
 
-// extern const uint8_t dingdong_wav_start[] asm("_binary_dingdong_wav_start");
-// extern const uint8_t dingdong_wav_end[]   asm("_binary_dingdong_wav_end");
+extern const uint8_t dingdong_wav_start[] asm("_binary_dingdong_wav_start");
+extern const uint8_t dingdong_wav_end[]   asm("_binary_dingdong_wav_end");
 
 QueueHandle_t soundVoideEventQueue = NULL;
 
@@ -103,23 +103,43 @@ void soundVoice_task(void *pvParameter)
     uint32_t soundVoiveEvent;
     while(1){
         if (xQueueReceive( soundVoideEventQueue , &soundVoiveEvent, 0 ) == pdTRUE){
-            LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_BLUE, 	254, 254,100);
-            LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_BLUE,	    254, 254,100);
-            LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 	254, 254,100);
-            playWaveFile(alarm_wav_start);
-            LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_GREEN, 	254, 254,100);
-            LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_GREEN,	254, 254,100);
-            LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_GREEN, 	254, 254,100);
+            if (soundVoiveEvent == 0){
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_BLUE, 	254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_BLUE,	    254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 	254, 254,100);
+                playWaveFile(dingdong_wav_start);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_GREEN, 	254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_GREEN,	254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_GREEN, 	254, 254,100);
 
-            vTaskDelay(500/portTICK_PERIOD_MS);
+                vTaskDelay(200/portTICK_PERIOD_MS);
 
-            LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_BLUE, 	254, 254,100);
-            LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_BLUE,	    254, 254,100);
-            LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 	254, 254,100);
-            playWaveFile(alarm_wav_start);
-            LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_GREEN, 	254, 254,100);
-            LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_GREEN,	254, 254,100);
-            LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_GREEN, 	254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_BLUE, 	254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_BLUE,	    254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 	254, 254,100);
+                playWaveFile(dingdong_wav_start);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_GREEN, 	254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_GREEN,	254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_GREEN, 	254, 254,100);
+            }else if (soundVoiveEvent == 1){
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_BLUE, 	254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_BLUE,	    254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 	254, 254,100);
+                playWaveFile(alarm_wav_start);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_RED, 	254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_RED,	254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_RED, 	254, 254,100);
+
+                vTaskDelay(200/portTICK_PERIOD_MS);
+
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_BLUE, 	254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_BLUE,	    254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 	254, 254,100);
+                playWaveFile(alarm_wav_start);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_RED, 	254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_RED,	254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_RED, 	254, 254,100);
+            }
         }
         vTaskDelay(5/portTICK_PERIOD_MS);
     }

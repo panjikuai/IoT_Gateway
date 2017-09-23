@@ -198,6 +198,9 @@ void wifi_Task(void *pvParameter)
 				}
 			}else{
 				if (event.keyValue == BUTTON_FUNC){
+					uint32_t soundIndex = 1;
+					xQueueSend( soundVoideEventQueue, &soundIndex, 10/portTICK_PERIOD_MS );
+					
 					if (ledStatus == 0){
 						ledStatus = 1;
 						LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_RED, 	254, 254,100);
