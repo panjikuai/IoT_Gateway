@@ -9,3 +9,4 @@
 COMPONENT_ADD_INCLUDEDIRS := . application application/include
 COMPONENT_SRCDIRS := . application
 COMPONENT_EMBED_FILES := alarm.wav
+#COMPONENT_EMBED_FILES := dingdong.wav
