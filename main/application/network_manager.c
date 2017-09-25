@@ -161,7 +161,7 @@ void loadReportInfo(NetworkMessage_t *message)
 	};
 
 	message->networkHeader.sof = NETWORK_MSG_SOF;
-	message->networkHeader.messageId = rand();
+	message->networkHeader.magicCode = rand();
 	message->networkHeader.messageType = NETWORK_MSG_TYPE_NON;
 	message->networkHeader.sumFrames = 1;
 	message->networkHeader.currFrameNo = 1;
