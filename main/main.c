@@ -156,7 +156,6 @@ void wifi_Task(void *pvParameter)
 
 void systemTimerCallback( TimerHandle_t xTimer )
 {
-	// static uint8_t count = 0;
 	static uint8_t state = 0;
 
 	if (gWifiStatus != WIFI_STATUS_CONNECTED_AP && gWifiStatus != WIFI_STATUS_GOT_IP){
@@ -197,16 +196,10 @@ void app_main(void)
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
-#ifdef _IOT_DEBUG_
 	DebugLog_Init();
-#endif
 	IoControl_Init();
 	LedDisplay_Init();
 	Button_KeyEventInit(keyShortPressedHandle, keyLongPressedHandle);
-
-	systemTimer = xTimerCreate("SYS_Timer", 5000 / portTICK_PERIOD_MS, pdTRUE, 0, systemTimerCallback );
-	xTimerStart(systemTimer,0);
-	
 	SoundVoice_Init();
 	// A2DP_Init();
 
@@ -220,6 +213,9 @@ void app_main(void)
 		GatewayManager_Init();
 		NetworkManager_Init();
 	}
+
+	systemTimer = xTimerCreate("SYS_Timer", 5000 / portTICK_PERIOD_MS, pdTRUE, 0, systemTimerCallback );
+	xTimerStart(systemTimer,0);
 
 	xTaskCreate(&wifi_Task, "WIFI", 2048, NULL, tskIDLE_PRIORITY+1, NULL);
 	
