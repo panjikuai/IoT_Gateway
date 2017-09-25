@@ -17,7 +17,8 @@
         "a2dp.c": "cpp",
         "bt_app_av.c": "cpp",
         "iot_debug.c": "cpp",
-        "storage.c": "cpp"
+        "storage.c": "cpp",
+        "cstdint": "cpp"
     },
     "clang.executable": "/usr/lib/llvm-3.8/bin/clang"
 }
