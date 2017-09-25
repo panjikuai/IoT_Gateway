@@ -119,7 +119,7 @@ uint8_t lastDateTypeIsData = 0;
 
 AirkissWiFiParam_t 	airkissWifiParam;
 wifi_country_t 		countryCode 		= WIFI_COUNTRY_US;
-Airkiss_callback_t 	airkiss_callback 	= NULL;
+Airkiss_Callback_t 	airkiss_callback 	= NULL;
 Airkiss_state_t 	airkissState 	 	= AIRKISS_CHANNEL_LISTERNING;
 TimerHandle_t 		channelSwitchTimer 	= NULL;
 TimerHandle_t		airkissStunkTimer   = NULL;
@@ -366,7 +366,7 @@ void airkissTask(void *pvParameter)
 	}
 }
 
-void Airkiss_start(Airkiss_callback_t cb)
+void Airkiss_Start(Airkiss_Callback_t cb)
 {
 	airkiss_callback = cb;
 	memset((uint8_t *)&airkissWifiParam,0,sizeof(AirkissWiFiParam_t));

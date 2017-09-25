@@ -37,8 +37,8 @@ typedef struct{
   uint8_t channel;
 }AirkissWiFiParam_t;
 
-typedef void(*Airkiss_callback_t)(uint8_t status, void *pdata);
-void Airkiss_start(Airkiss_callback_t cb);
+typedef void(*Airkiss_Callback_t)(uint8_t status, void *pdata);
+void Airkiss_Start(Airkiss_Callback_t cb);
 
 
 

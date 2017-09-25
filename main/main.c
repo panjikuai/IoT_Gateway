@@ -228,7 +228,7 @@ void app_main(void)
 	buttonHandleQueue = xQueueCreate( 1, sizeof(ButtonHandleEvent_t) );
 
     if (WIFI_GetWifiParam(&gWifiParam) != ESP_OK){
-		Airkiss_start(smartConfig_callback);
+		Airkiss_Start(smartConfig_callback);
     }else{
     	WIFI_ConnecToTargetAP(&gWifiParam);
 		GatewayManager_Init();
