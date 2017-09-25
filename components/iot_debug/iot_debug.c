@@ -8,7 +8,7 @@
 
 xSemaphoreHandle xsem_dbg = NULL;
 
-void create_debug_semaphore(void)
+void DebugLog_Init(void)
 {
 	vSemaphoreCreateBinary(xsem_dbg);
 }

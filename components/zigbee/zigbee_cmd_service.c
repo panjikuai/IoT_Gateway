@@ -29,6 +29,8 @@
 //
 //CommStateMachine_t commStateMachine = COMM_STATE_MACHINE_SOF;
 
+extern QueueHandle_t soundVoideEventQueue;
+
 QueueHandle_t uart_queue;
 uint8_t uart_rx_buff[RX_BUFF_SIZE];
 
@@ -65,7 +67,7 @@ bool check_report_packet(uint8_t *packet_buf, uint8_t packet_size) //sensor repo
 }
 
 /* check header, length, crc of received packet */
-bool check_response_packet(appCmdDescriptor_t *pCmdDesc,Cmd_Response_t *rsp)
+bool check_response_packet(AppCmdDescriptor_t *pCmdDesc,Cmd_Response_t *rsp)
 {
 	rsp->status = COMM_FALSE;
 	bool isResponsePack = true;
@@ -143,7 +145,7 @@ void zigbee_data_recv_task(void *pvParameter)
 	uart_event_t event;
 	int32_t  rx_length;
 	Cmd_Response_t resp;
-	appCmdDescriptor_t *pCmdDesc;
+	AppCmdDescriptor_t *pCmdDesc;
 	uint8_t *pbuf = NULL;
 	uint8_t pkt_len;
 
@@ -153,7 +155,7 @@ void zigbee_data_recv_task(void *pvParameter)
 	while(1){
 		if (xQueueReceive(uart_queue, (void * )&event, (portTickType)portMAX_DELAY)){
 			if (event.type == UART_DATA || event.type == UART_BUFFER_FULL || event.type == UART_FIFO_OVF){
-				rx_length = queue_uart_read_packet(uart_rx_buff);
+				rx_length = QueueUart_ReadPacket(uart_rx_buff);
 				pbuf = uart_rx_buff;
 				pkt_len = pbuf[2];
 
@@ -169,6 +171,9 @@ void zigbee_data_recv_task(void *pvParameter)
 					if (check_report_packet(resp.responsePayload, resp.responseLength)){
 						IoT_DEBUG(ZIGBEE_DBG | IoT_DBG_INFO, ("Sensor report packet.\r\n"));
 						//Handler report info
+						uint32_t soundIndex = 0;
+						xQueueSend( soundVoideEventQueue, &soundIndex, 10/portTICK_PERIOD_MS );
+
 					}else{
 						if(xQueuePeek(zigbee_cmd_queue,(void*)&pCmdDesc, 0)){
 							if(check_response_packet(pCmdDesc,&resp)){
@@ -195,7 +200,7 @@ void zigbee_data_recv_task(void *pvParameter)
 }
 
 /* generate zigbee packet */
-uint8_t generate_packet(appCmdDescriptor_t* pCmdDesc)
+uint8_t generate_packet(AppCmdDescriptor_t* pCmdDesc)
 {
 	uint8_t length = HEAD_SIZE_GENERIC_HEADER + pCmdDesc->length + 1;
 	if (length > MAX_PAYLOAD_SIZE){
@@ -210,12 +215,12 @@ uint8_t generate_packet(appCmdDescriptor_t* pCmdDesc)
 
 
 /* send packet to zigbee serial send task and wait for result */
-bool zigbee_cmd_service_process_packet(appCmdDescriptor_t* pCmdDesc)
+bool ZigbeeCmdService_ProcessPacket(AppCmdDescriptor_t* pCmdDesc)
 {
 	uint8_t packet_len;
 	uint8_t result;
 	uint8_t retry_cnt=0;
-	appCmdDescriptor_t *pCmd;
+	AppCmdDescriptor_t *pCmd;
 	Cmd_Response_t resp;
 	packet_len = generate_packet(pCmdDesc);
 	if (packet_len == 0){
@@ -224,7 +229,7 @@ bool zigbee_cmd_service_process_packet(appCmdDescriptor_t* pCmdDesc)
 
 	while(retry_cnt < ZIGBEE_SEND_RETRY_TIMES){
 		xQueueSend(zigbee_cmd_queue, &pCmdDesc,10);
-		if(queue_uart_send_packet(pCmdDesc->payload, packet_len)){
+		if(QueueUart_SendPacket(pCmdDesc->payload, packet_len)){
 			if(xQueueReceive(zigbee_cmd_result_queue, &result, pCmdDesc->timeout)){
 				if(result == COMM_SUCCESS){
 					return true;
@@ -254,13 +259,22 @@ bool zigbee_cmd_service_process_packet(appCmdDescriptor_t* pCmdDesc)
 	return false;
 }
 
-void zigbee_cmd_service_init(void)
+void ZigbeeCmdService_Init(void)
 {
 	zigbee_cmd_queue = xQueueCreate(ZIGBEE_CMD_QUEUE_LEN, sizeof(void *));
 	zigbee_cmd_result_queue = xQueueCreate(ZIGBEE_CMD_RESULT_QUEUE_LEN, sizeof(uint8_t));
-	queue_uart_init(&uart_queue);
+	QueueUart_Init(&uart_queue);
 	xTaskCreate(&zigbee_data_recv_task, "ZB_RECV", 2048, NULL, tskIDLE_PRIORITY+4, NULL);
 }
 
+
+void ZigbeeCmdService_ResetModule(void)
+{
+	gpio_set_direction(GPIO_NUM_17, GPIO_MODE_OUTPUT);
+	gpio_set_level(GPIO_NUM_17, 0);
+	vTaskDelay(10/portTICK_PERIOD_MS);
+	gpio_set_level(GPIO_NUM_17, 1);
+	vTaskDelay(500/portTICK_PERIOD_MS);
+}
 
 

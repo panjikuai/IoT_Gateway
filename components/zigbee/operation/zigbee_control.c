@@ -7,7 +7,7 @@
 //#define ZCL_ONOFF_CLUSTER_OFF_COMMAND_ID 0x00
 //#define ZCL_ONOFF_CLUSTER_ON_COMMAND_ID 0x01
 //#define ZCL_ONOFF_CLUSTER_TOGGLE_COMMAND_ID 0x02
-void zigbee_ctrl_on_off(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t commandId)
+void ZigbeeCtrl_OnOff(AppCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t commandId)
 {
 	cmdDesc->length = HEAD_SIZE_DEVICE_OPT;
 	cmdDesc->packType = PACK_TYPE_DEVICE_CONTROL;
@@ -24,7 +24,7 @@ void zigbee_ctrl_on_off(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint
 
 //#define ZCL_LEVEL_CONTROL_CLUSTER_MOVE_TO_LEVEL_COMMAND_ID          0x00
 //#define ZCL_LEVEL_CONTROL_CLUSTER_MOVE_TO_LEVEL_W_ONOFF_COMMAND_ID  0x04
-void zigbee_ctrl_move_to_level(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t commandId,uint8_t level, uint16_t transitionTime)
+void ZigbeeCtrl_MoveToLevel(AppCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t commandId,uint8_t level, uint16_t transitionTime)
 {
 	cmdDesc->length = HEAD_SIZE_DEVICE_OPT + sizeof(ZCL_MoveToLevel_t);
 	cmdDesc->packType = PACK_TYPE_DEVICE_CONTROL;
@@ -43,7 +43,7 @@ void zigbee_ctrl_move_to_level(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMo
 
 //#define ZCL_LEVEL_CONTROL_CLUSTER_MOVE_COMMAND_ID                   0x01
 //#define ZCL_LEVEL_CONTROL_CLUSTER_MOVE_W_ONOFF_COMMAND_ID           0x05
-void zigbee_ctrl_move_level(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t commandId,uint8_t moveMode, uint8_t rate)
+void ZigbeeCtrl_MoveLevel(AppCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t commandId,uint8_t moveMode, uint8_t rate)
 {
 	cmdDesc->length = HEAD_SIZE_DEVICE_OPT + sizeof(ZCL_Move_t);
 	cmdDesc->packType = PACK_TYPE_DEVICE_CONTROL;
@@ -62,7 +62,7 @@ void zigbee_ctrl_move_level(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,
 
 //#define ZCL_LEVEL_CONTROL_CLUSTER_STEP_COMMAND_ID                   0x02
 //#define ZCL_LEVEL_CONTROL_CLUSTER_STEP_W_ONOFF_COMMAND_ID           0x06
-void zigbee_ctrl_step_level(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t commandId,uint8_t stepMode, uint8_t stepSize, uint16_t transitionTime)
+void ZigbeeCtrl_StepLevel(AppCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t commandId,uint8_t stepMode, uint8_t stepSize, uint16_t transitionTime)
 {
 	cmdDesc->length = HEAD_SIZE_DEVICE_OPT + sizeof(ZCL_Step_t);
 	cmdDesc->packType = PACK_TYPE_DEVICE_CONTROL;
@@ -82,7 +82,7 @@ void zigbee_ctrl_step_level(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,
 
 //#define ZCL_LEVEL_CONTROL_CLUSTER_STOP_COMMAND_ID                   0x03
 //#define ZCL_LEVEL_CONTROL_CLUSTER_STOP_W_ONOFF_COMMAND_ID           0x07
-void zigbee_ctrl_stop_level(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t commandId)
+void ZigbeeCtrl_StopLevel(AppCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t commandId)
 {
 	cmdDesc->length = HEAD_SIZE_DEVICE_OPT;
 	cmdDesc->packType = PACK_TYPE_DEVICE_CONTROL;
@@ -97,7 +97,7 @@ void zigbee_ctrl_stop_level(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,
 	cmdDesc->timeout = DEVICE_OPT_TIMEOUT;
 }
 
-void zigbee_ctrl_move_to_hue_and_saturation(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t hue, uint8_t saturation, uint16_t transitionTime)
+void ZigbeeCtrl_MoveToHueAndSaturation(AppCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t hue, uint8_t saturation, uint16_t transitionTime)
 {
 	cmdDesc->length = HEAD_SIZE_DEVICE_OPT + sizeof(ZCL_ZllMoveToHueAndSaturationCommand_t);
 	cmdDesc->packType = PACK_TYPE_DEVICE_CONTROL;
@@ -116,7 +116,7 @@ void zigbee_ctrl_move_to_hue_and_saturation(appCmdDescriptor_t *cmdDesc,APS_Addr
 	cmdDesc->timeout = DEVICE_OPT_TIMEOUT;
 }
 
-void zigbee_ctrl_enhanced_move_to_hue_and_saturation(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint16_t enhancedHue, uint8_t saturation, uint16_t transitionTime)
+void ZigbeeCtrl_EnhancedMoveToHueAndSaturation(AppCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint16_t enhancedHue, uint8_t saturation, uint16_t transitionTime)
 {
 	cmdDesc->length = HEAD_SIZE_DEVICE_OPT + sizeof(ZCL_ZllEnhancedMoveToHueAndSaturationCommand_t);
 	cmdDesc->packType = PACK_TYPE_DEVICE_CONTROL;
@@ -136,7 +136,7 @@ void zigbee_ctrl_enhanced_move_to_hue_and_saturation(appCmdDescriptor_t *cmdDesc
 }
 
 
-void zigbee_ctrl_move_hue(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t moveMode, uint8_t rate)
+void ZigbeeCtrl_MoveHue(AppCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t moveMode, uint8_t rate)
 {
 	cmdDesc->length = HEAD_SIZE_DEVICE_OPT + sizeof(ZCL_ZllMoveHueCommand_t);
 	cmdDesc->packType = PACK_TYPE_DEVICE_CONTROL;
@@ -154,7 +154,7 @@ void zigbee_ctrl_move_hue(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,ui
 	cmdDesc->timeout = DEVICE_OPT_TIMEOUT;
 }
 
-void zigbee_ctrl_enhanced_move_hue(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t moveMode, uint16_t rate)
+void ZigbeeCtrl_EnhancedMoveHue(AppCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t moveMode, uint16_t rate)
 {
 	cmdDesc->length = HEAD_SIZE_DEVICE_OPT + sizeof(ZCL_ZllEnhancedMoveHueCommand_t);
 	cmdDesc->packType = PACK_TYPE_DEVICE_CONTROL;
@@ -173,7 +173,7 @@ void zigbee_ctrl_enhanced_move_hue(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t ad
 }
 
 
-void zigbee_ctrl_step_hue(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t stepMode, uint8_t stepSize, uint8_t transitionTime)
+void ZigbeeCtrl_StepHue(AppCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t stepMode, uint8_t stepSize, uint8_t transitionTime)
 {
 	cmdDesc->length = HEAD_SIZE_DEVICE_OPT + sizeof(ZCL_ZllStepHueCommand_t);
 	cmdDesc->packType = PACK_TYPE_DEVICE_CONTROL;
@@ -192,7 +192,7 @@ void zigbee_ctrl_step_hue(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,ui
 	cmdDesc->timeout = DEVICE_OPT_TIMEOUT;
 }
 
-void zigbee_ctrl_enhanced_step_hue(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t stepMode, uint16_t stepSize, uint16_t transitionTime)
+void ZigbeeCtrl_EnhancedStepHue(AppCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t stepMode, uint16_t stepSize, uint16_t transitionTime)
 {
 	cmdDesc->length = HEAD_SIZE_DEVICE_OPT + sizeof(ZCL_ZllEnhancedStepHueCommand_t);
 	cmdDesc->packType = PACK_TYPE_DEVICE_CONTROL;
@@ -211,7 +211,7 @@ void zigbee_ctrl_enhanced_step_hue(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t ad
 	cmdDesc->timeout = DEVICE_OPT_TIMEOUT;
 }
 
-void zigbee_ctrl_move_to_color(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint16_t colorX, uint16_t colorY, uint16_t transitionTime)
+void ZigbeeCtrl_MoveToColor(AppCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint16_t colorX, uint16_t colorY, uint16_t transitionTime)
 {
 	cmdDesc->length = HEAD_SIZE_DEVICE_OPT + sizeof(ZCL_ZllMoveToColorCommand_t);
 	cmdDesc->packType = PACK_TYPE_DEVICE_CONTROL;
@@ -230,7 +230,7 @@ void zigbee_ctrl_move_to_color(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMo
 	cmdDesc->timeout = DEVICE_OPT_TIMEOUT;
 }
 
-void zigbee_ctrl_move_to_colorTemperature(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint16_t colorTemperature, uint16_t transitionTime)
+void ZigbeeCtrl_MoveToColorTemperature(AppCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint16_t colorTemperature, uint16_t transitionTime)
 {
 	cmdDesc->length = HEAD_SIZE_DEVICE_OPT + sizeof(ZCL_ZllMoveToColorTemperatureCommand_t);
 	cmdDesc->packType = PACK_TYPE_DEVICE_CONTROL;
@@ -248,7 +248,7 @@ void zigbee_ctrl_move_to_colorTemperature(appCmdDescriptor_t *cmdDesc,APS_AddrMo
 	cmdDesc->timeout = DEVICE_OPT_TIMEOUT;
 }
 
-void zigbee_ctrl_move_colorTemperature(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t  moveMode, uint16_t rate,uint16_t colorTemperatureMinimum,uint16_t colorTemperatureMaximum)
+void ZigbeeCtrl_MoveColorTemperature(AppCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t  moveMode, uint16_t rate,uint16_t colorTemperatureMinimum,uint16_t colorTemperatureMaximum)
 {
 	cmdDesc->length = HEAD_SIZE_DEVICE_OPT + sizeof(ZCL_ZllMoveColorTemperatureCommand_t);
 	cmdDesc->packType = PACK_TYPE_DEVICE_CONTROL;
@@ -268,7 +268,7 @@ void zigbee_ctrl_move_colorTemperature(appCmdDescriptor_t *cmdDesc,APS_AddrMode_
 	cmdDesc->timeout = DEVICE_OPT_TIMEOUT;
 }
 
-void zigbee_ctrl_step_colorTemperature(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t  stepMode, uint16_t stepSize,uint16_t transitionTime,uint16_t colorTemperatureMinimum,uint16_t colorTemperatureMaximum)
+void ZigbeeCtrl_StepColorTemperature(AppCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint8_t  stepMode, uint16_t stepSize,uint16_t transitionTime,uint16_t colorTemperatureMinimum,uint16_t colorTemperatureMaximum)
 {
 	cmdDesc->length = HEAD_SIZE_DEVICE_OPT + sizeof(ZCL_ZllStepColorTemperatureCommand_t);
 	cmdDesc->packType = PACK_TYPE_DEVICE_CONTROL;
@@ -289,7 +289,7 @@ void zigbee_ctrl_step_colorTemperature(appCmdDescriptor_t *cmdDesc,APS_AddrMode_
 	cmdDesc->timeout = DEVICE_OPT_TIMEOUT;
 }
 
-void zigbee_ctrl_recall_scene(appCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint16_t  groupId, uint8_t sceneId)
+void ZigbeeCtrl_RecallScene(AppCmdDescriptor_t *cmdDesc,APS_AddrMode_t addrMode,uint8_t address,uint8_t endpoint,uint16_t  groupId, uint8_t sceneId)
 {
 	cmdDesc->length = HEAD_SIZE_DEVICE_OPT + sizeof(ZCL_RecallScene_t);
 	cmdDesc->packType = PACK_TYPE_DEVICE_CONTROL;

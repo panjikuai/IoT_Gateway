@@ -17,7 +17,7 @@
 #define SMART_CONFIG_DIR 		"WiFi"
 #define SMART_CONFIG_FILE_WIFI 	"parameter"
 
-esp_err_t wifi_get_Wifi_param(WiFiConfigParam_t *param)
+esp_err_t WIFI_GetWifiParam(WiFiConfigParam_t *param)
 {
 	esp_err_t err;
 	err = storage_getflash(SMART_CONFIG_DIR, SMART_CONFIG_FILE_WIFI,param, sizeof(WiFiConfigParam_t));
@@ -30,7 +30,7 @@ esp_err_t wifi_get_Wifi_param(WiFiConfigParam_t *param)
 	return err;
 }
 
-esp_err_t wifi_set_wifi_param(WiFiConfigParam_t *param)
+esp_err_t WIFI_SetWifiParam(WiFiConfigParam_t *param)
 {
 	esp_err_t err;
 	err = storage_setflash(SMART_CONFIG_DIR, SMART_CONFIG_FILE_WIFI,param, sizeof(WiFiConfigParam_t));
@@ -38,7 +38,7 @@ esp_err_t wifi_set_wifi_param(WiFiConfigParam_t *param)
 
 }
 
-void wifi_connect_to_target_ap(WiFiConfigParam_t *param)
+void WIFI_ConnecToTargetAP(WiFiConfigParam_t *param)
 {
     wifi_config_t sta_config;
     memset(&sta_config,0,sizeof(wifi_config_t));

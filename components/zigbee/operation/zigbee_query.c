@@ -4,7 +4,7 @@
 
 #define DEVICE_QUERY_TIMEOUT  (500)
 
-void zigbee_query_on_off(appCmdDescriptor_t *cmdDesc,uint8_t address,uint8_t endpoint)
+void ZigbeeQuery_OnOff(AppCmdDescriptor_t *cmdDesc,uint8_t address,uint8_t endpoint)
 {
 	cmdDesc->packType = PACK_TYPE_DEVICE_STATE_MANAGEMENT;
 	cmdDesc->DeviceStateMgmt.clusterId = ONOFF_CLUSTER_ID;
@@ -20,7 +20,7 @@ void zigbee_query_on_off(appCmdDescriptor_t *cmdDesc,uint8_t address,uint8_t end
 	cmdDesc->timeout = DEVICE_QUERY_TIMEOUT;
 }
 
-void zigbee_query_level(appCmdDescriptor_t *cmdDesc,uint8_t address,uint8_t endpoint)
+void ZigbeeQuery_Level(AppCmdDescriptor_t *cmdDesc,uint8_t address,uint8_t endpoint)
 {
 	cmdDesc->packType = PACK_TYPE_DEVICE_STATE_MANAGEMENT;
 	cmdDesc->DeviceStateMgmt.clusterId = LEVEL_CONTROL_CLUSTER_ID;
@@ -37,7 +37,7 @@ void zigbee_query_level(appCmdDescriptor_t *cmdDesc,uint8_t address,uint8_t endp
 	cmdDesc->timeout = DEVICE_QUERY_TIMEOUT;
 }
 
-void zigbee_query_color(appCmdDescriptor_t *cmdDesc,uint8_t address,uint8_t endpoint)
+void ZigbeeQuery_Color(AppCmdDescriptor_t *cmdDesc,uint8_t address,uint8_t endpoint)
 {
 	cmdDesc->packType = PACK_TYPE_DEVICE_STATE_MANAGEMENT;
 	cmdDesc->DeviceStateMgmt.clusterId = COLOR_CONTROL_CLUSTER_ID;
@@ -54,7 +54,7 @@ void zigbee_query_color(appCmdDescriptor_t *cmdDesc,uint8_t address,uint8_t endp
 	cmdDesc->timeout = DEVICE_QUERY_TIMEOUT;
 }
 
-void zigbee_query_extended_color(appCmdDescriptor_t *cmdDesc,uint8_t address,uint8_t endpoint)
+void ZigbeeQuery_ExtendedColor(AppCmdDescriptor_t *cmdDesc,uint8_t address,uint8_t endpoint)
 {
 	cmdDesc->packType = PACK_TYPE_DEVICE_STATE_MANAGEMENT;
 	cmdDesc->DeviceStateMgmt.clusterId = COLOR_CONTROL_CLUSTER_ID;
@@ -74,7 +74,7 @@ void zigbee_query_extended_color(appCmdDescriptor_t *cmdDesc,uint8_t address,uin
 	cmdDesc->timeout = DEVICE_QUERY_TIMEOUT;
 }
 
-void zigbee_query_colortemp(appCmdDescriptor_t *cmdDesc,uint8_t address,uint8_t endpoint)
+void ZigbeeQuery_ColorTemperature(AppCmdDescriptor_t *cmdDesc,uint8_t address,uint8_t endpoint)
 {
 	cmdDesc->packType = PACK_TYPE_DEVICE_STATE_MANAGEMENT;
 	cmdDesc->DeviceStateMgmt.clusterId = COLOR_CONTROL_CLUSTER_ID;
@@ -93,7 +93,7 @@ void zigbee_query_colortemp(appCmdDescriptor_t *cmdDesc,uint8_t address,uint8_t 
 }
 
 
-//void zigbee_query_color(appCmdDescriptor_t *cmdDesc,uint8_t address,uint8_t endpoint)
+//void ZigbeeQuery_Color(AppCmdDescriptor_t *cmdDesc,uint8_t address,uint8_t endpoint)
 //{
 //	cmdDesc->packType = PACK_TYPE_DEVICE_STATE_MANAGEMENT;
 //	cmdDesc->DeviceStateMgmt.clusterId = COLOR_CONTROL_CLUSTER_ID;

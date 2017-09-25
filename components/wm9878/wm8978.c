@@ -9,8 +9,11 @@
 #include "wm8978.h"
 #include "iot_debug.h"
 
-#define I2C_MASTER_SCL_IO    		19    	/*!< gpio number for I2C master clock */
-#define I2C_MASTER_SDA_IO    		18    	/*!< gpio number for I2C master data  */
+#define I2C_MASTER_SCL_IO    		25//19    	/*!< gpio number for I2C master clock */
+#define I2C_MASTER_SDA_IO    		33//18    	/*!< gpio number for I2C master data  */
+// #define I2C_MASTER_SCL_IO    		19    	/*!< gpio number for I2C master clock */
+// #define I2C_MASTER_SDA_IO    		18    	/*!< gpio number for I2C master data  */
+
 #define I2C_MASTER_NUM 				I2C_NUM_1 /*!< I2C port number for master dev */
 #define I2C_MASTER_TX_BUF_DISABLE   0   	/*!< I2C master do not need buffer */
 #define I2C_MASTER_RX_BUF_DISABLE   0   	/*!< I2C master do not need buffer */
@@ -206,7 +209,7 @@ void WM8978_HPvol_Set(uint8_t voll,uint8_t volr)
 
 void WM8978_SPKvol_Set(uint8_t volx)
 {
-	volx&=0X3F;
+	volx&=0x3F;
 	if(volx==0)volx|=1<<6;									
  	wm_write_register(54,volx);							
 	wm_write_register(55,volx|(1<<8));				
@@ -239,8 +242,8 @@ int WM8978_Init(void)
 	WM8978_ADDA_Cfg(1,0);								
 	WM8978_Input_Cfg(0,0,0);
 	WM8978_Output_Cfg(1,0);
-	WM8978_HPvol_Set(30,30);
-	WM8978_SPKvol_Set(63);
+	WM8978_HPvol_Set(63,63);
+	WM8978_SPKvol_Set(60);
 
 	return 0;
 }

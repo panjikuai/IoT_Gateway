@@ -4,7 +4,7 @@
 
 #define NETWORK_OPT_TIMEOUT  (500)
 
-void zigbee_network_change_phy_channel(appCmdDescriptor_t *cmdDesc)
+void ZigbeeNetwork_ChangePhyChannel(AppCmdDescriptor_t *cmdDesc)
 {
 	cmdDesc->length = HEAD_SIZE_NWK_MGMT;
 	cmdDesc->packType = PACK_TYPE_DEVICE_NETWORK_MANAGEMENT;
@@ -13,7 +13,7 @@ void zigbee_network_change_phy_channel(appCmdDescriptor_t *cmdDesc)
 	cmdDesc->timeout = NETWORK_OPT_TIMEOUT;
 }
 
-void zigbee_network_reset_gateway_to_fn(appCmdDescriptor_t *cmdDesc)
+void ZigbeeNetwork_ResetGatewayToFn(AppCmdDescriptor_t *cmdDesc)
 {
 	cmdDesc->length = HEAD_SIZE_NWK_MGMT;
 	cmdDesc->packType = PACK_TYPE_DEVICE_NETWORK_MANAGEMENT;
@@ -23,7 +23,7 @@ void zigbee_network_reset_gateway_to_fn(appCmdDescriptor_t *cmdDesc)
 }
 
 
-void zigbee_network_classic_permit_join(appCmdDescriptor_t *cmdDesc)
+void ZigbeeNetwork_ClassicPermitJoin(AppCmdDescriptor_t *cmdDesc)
 {
 	cmdDesc->length = HEAD_SIZE_NWK_MGMT + sizeof(NwkMgmtClassicJoinPermitJoin_t);
 	cmdDesc->packType = PACK_TYPE_DEVICE_NETWORK_MANAGEMENT;
@@ -34,7 +34,7 @@ void zigbee_network_classic_permit_join(appCmdDescriptor_t *cmdDesc)
 	cmdDesc->timeout = NETWORK_OPT_TIMEOUT;
 }
 
-void zigbee_network_touchlink(appCmdDescriptor_t *cmdDesc)
+void ZigbeeNetwork_Touchlink(AppCmdDescriptor_t *cmdDesc)
 {
 	cmdDesc->length = HEAD_SIZE_NWK_MGMT;
 	cmdDesc->packType = PACK_TYPE_DEVICE_NETWORK_MANAGEMENT;
@@ -43,7 +43,7 @@ void zigbee_network_touchlink(appCmdDescriptor_t *cmdDesc)
 	cmdDesc->timeout = NETWORK_OPT_TIMEOUT*15;
 }
 
-void zigbee_network_reset_device_to_fn(appCmdDescriptor_t *cmdDesc,uint8_t address, uint8_t endpoint)
+void ZigbeeNetwork_ResetDeviceToFn(AppCmdDescriptor_t *cmdDesc,uint8_t address, uint8_t endpoint)
 {
 	cmdDesc->length = HEAD_SIZE_NWK_MGMT + sizeof(NwkMgmtClassicJoinRstTargetToFn_t);
 	cmdDesc->packType = PACK_TYPE_DEVICE_NETWORK_MANAGEMENT;

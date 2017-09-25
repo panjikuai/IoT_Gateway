@@ -19,16 +19,24 @@
 #include "driver/ledc.h"
 
 #include "iot_debug.h"
+#include "ledDisplay.h"
 
-#define SAMPLE_RATE         (36000)
+// #define SAMPLE_RATE         (36000)
 #define I2S_NUM             (0)
-#define WAVE_FREQ_HZ        (1000)
-#define PI 3.14159265
-#define SAMPLE_PER_CYCLE    (SAMPLE_RATE/WAVE_FREQ_HZ)
+// #define WAVE_FREQ_HZ        (1000)
+// #define PI 3.14159265
+// #define SAMPLE_PER_CYCLE    (SAMPLE_RATE/WAVE_FREQ_HZ)
+#define BLOCK_SIZE          (240)
 
 extern const uint8_t alarm_wav_start[] asm("_binary_alarm_wav_start");
 extern const uint8_t alarm_wav_end[]   asm("_binary_alarm_wav_end");
 
+extern const uint8_t dingdong_wav_start[] asm("_binary_dingdong_wav_start");
+extern const uint8_t dingdong_wav_end[]   asm("_binary_dingdong_wav_end");
+
+QueueHandle_t soundVoideEventQueue = NULL;
+
+void playWaveFile(const uint8_t *pFile);
 
 typedef struct{
     uint8_t     ChunkID[4];   //内容为"RIFF"
@@ -55,23 +63,21 @@ typedef struct{
 typedef struct{
     wave_header_t       header;
     wave_fmt_t          fmt;
-    wave_data_header_t  data_header;
-    uint8_t            data[1];
 }wave_format_t;
 
-wave_format_t *wave_format;
+typedef struct{
+    wave_data_header_t data_header;
+    uint8_t            data[1];
+}wave_data_t;
+
+
 
 void i2s_init(void)
 {
-    wave_format = (wave_format_t *)alarm_wav_start;
-
-    //for 36Khz sample rates, we create 100Hz sine wave, every cycle need 36000/100 = 360 samples (4-bytes each sample)
-    //using 6 buffers, we need 60-samples per buffer
-    //2-channels, 16-bit each channel, total buffer is 360*4 = 1440 bytes
     i2s_config_t i2s_config = {
         .mode = I2S_MODE_MASTER | I2S_MODE_TX,                                  // Only TX
-        .sample_rate = 44100,//wave_format->fmt.SampleRate,//SAMPLE_RATE,
-        .bits_per_sample = 16,//wave_format->fmt.BitsPerSample,//16,                                                  //16-bit per channel
+        .sample_rate = 44100,//SAMPLE_RATE,
+        .bits_per_sample = 16,                                                  //16-bit per channel
         .channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT,//((wave_format->fmt.NumChannels == 2)? I2S_CHANNEL_FMT_RIGHT_LEFT : I2S_CHANNEL_FMT_ALL_RIGHT),                           //2-channels
         .communication_format = I2S_COMM_FORMAT_I2S | I2S_COMM_FORMAT_I2S_MSB,
         .dma_buf_count = 6,
@@ -79,10 +85,10 @@ void i2s_init(void)
         .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1                                //Interrupt level 1
     };
     i2s_pin_config_t pin_config = {
-        .bck_io_num = 22,
-        .ws_io_num = 23,
-        .data_out_num = 5,
-        .data_in_num = -1                                                       //Not used
+        .bck_io_num     = 14,
+        .ws_io_num      = 12,
+        .data_out_num   = 26,
+        .data_in_num    = -1 //                                                 //Not used
     };
 
     i2s_driver_install(I2S_NUM, &i2s_config, 0, NULL);
@@ -92,70 +98,110 @@ void i2s_init(void)
     REG_SET_FIELD(PIN_CTRL,CLK_OUT1,0);
 }
 
-void sound_voice_task(void *pvParameter)
+void soundVoice_task(void *pvParameter)
 {
-    // unsigned int i;
-    // unsigned int sample_val_arr[SAMPLE_PER_CYCLE] = { 0 };
-    // float sin_float, triangle_float, triangle_step = 65536.0 / SAMPLE_PER_CYCLE;
-    // vTaskDelay(50/portTICK_PERIOD_MS);
-    // triangle_float = -32767;
-
-    // uint16_t index = 0;
-    // uint16_t sampleCycle = SAMPLE_PER_CYCLE;
-
-    uint32_t blockSize = wave_format->data_header.Subchunk2Size/(wave_format->fmt.NumChannels * wave_format->fmt.BitsPerSample/8)/SAMPLE_PER_CYCLE;
-    uint32_t blockCount = 0;
-
-    vTaskDelay(2000/portTICK_PERIOD_MS);
-    IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO,("blockSize: %d, blockCount: %d\r",blockSize,blockCount));
-    IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO,("SampleRate: %d, BitsPerSample: %d,NumChannels :%d\n",wave_format->fmt.SampleRate,wave_format->fmt.BitsPerSample,wave_format->fmt.NumChannels ));
-    // uint32_t size = blockSize > SAMPLE_PER_CYCLE? SAMPLE_PER_CYCLE : blockSize;
+    uint32_t soundVoiveEvent;
     while(1){
+        if (xQueueReceive( soundVoideEventQueue , &soundVoiveEvent, 0 ) == pdTRUE){
+            if (soundVoiveEvent == 0){
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_BLUE, 	254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_BLUE,	    254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 	254, 254,100);
+                playWaveFile(dingdong_wav_start);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_GREEN, 	254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_GREEN,	254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_GREEN, 	254, 254,100);
 
-        // triangle_float = -32767;
-        // index++;
-        // if ( index <100 ){
-        //     sampleCycle = SAMPLE_PER_CYCLE/5;
-        //     triangle_step = 65536.0 / sampleCycle;
-        // }else if ( index < 200){
-        //     sampleCycle = SAMPLE_PER_CYCLE;
-        //     triangle_step = 65536.0 / sampleCycle;
-        // }else{
-        //     index = 0;
-        // }
-  
+                vTaskDelay(200/portTICK_PERIOD_MS);
 
-        // triangle_step = 65536.0 / sampleCycle;
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_BLUE, 	254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_BLUE,	    254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 	254, 254,100);
+                playWaveFile(dingdong_wav_start);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_GREEN, 	254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_GREEN,	254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_GREEN, 	254, 254,100);
+            }else if (soundVoiveEvent == 1){
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_BLUE, 	254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_BLUE,	    254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 	254, 254,100);
+                playWaveFile(alarm_wav_start);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_RED, 	254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_RED,	254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_RED, 	254, 254,100);
 
+                vTaskDelay(200/portTICK_PERIOD_MS);
 
-        // for(i = 0; i < sampleCycle; i++) {
-        //     sin_float = sin(i * PI / 180.0);
-        //     if(sin_float >= 0)
-        //         triangle_float += triangle_step;
-        //     else
-        //         triangle_float -= triangle_step;
-        //     sin_float  *= 32767;
-        //     sample_val_arr[i] = 0;
-        //     sample_val_arr[i] += (short)triangle_float;
-
-        //     sample_val_arr[i] = sample_val_arr[i] << 16;
-        //     sample_val_arr[i] += (short) sin_float;
-        // }
-
-        i2s_write_bytes(I2S_NUM, (const char *)(wave_format->data + blockCount * SAMPLE_PER_CYCLE*4), SAMPLE_PER_CYCLE*4, portMAX_DELAY);
-        blockCount++;
-        //IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO,("blockSize: %d, blockCount: %d\n",blockSize,blockCount));
-        if (blockCount >= blockSize){
-            blockCount = 0;
-            vTaskDelay(2000/portTICK_PERIOD_MS);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_BLUE, 	254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_BLUE,	    254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_BLUE, 	254, 254,100);
+                playWaveFile(alarm_wav_start);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_RED, 	254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_RED,	254, 254,100);
+                LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, LIGHT_RED, 	254, 254,100);
+            }
         }
-        
+        vTaskDelay(5/portTICK_PERIOD_MS);
     }
 }
 
-void Sound_Voice_Init(void)
+void playWaveFile(const uint8_t *pFile)
+{
+    wave_format_t *wave_format  = (wave_format_t *)pFile;
+    wave_data_t   *wave_data    = (wave_data_t *)(pFile + sizeof(wave_header_t)+ 4 + 4 + wave_format->fmt.Subchunk1Size);
+
+    i2s_config_t i2s_config = {
+        .mode = I2S_MODE_MASTER | I2S_MODE_TX,                                  // Only TX
+        .sample_rate = wave_format->fmt.SampleRate,//SAMPLE_RATE,
+        .bits_per_sample = wave_format->fmt.BitsPerSample,//16,                                                  //16-bit per channel
+        .channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT,//((wave_format->fmt.NumChannels == 2)? I2S_CHANNEL_FMT_RIGHT_LEFT : I2S_CHANNEL_FMT_ALL_RIGHT),                           //2-channels
+        .communication_format = I2S_COMM_FORMAT_I2S | I2S_COMM_FORMAT_I2S_MSB,
+        .dma_buf_count = 6,
+        .dma_buf_len = 60,                                                      //
+        .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1                                //Interrupt level 1
+    };
+    i2s_pin_config_t pin_config = {
+        .bck_io_num     = 14,
+        .ws_io_num      = 12,
+        .data_out_num   = 26,
+        .data_in_num    = -1 //                                                 //Not used
+    };
+
+    i2s_driver_uninstall(I2S_NUM);
+    i2s_driver_install(I2S_NUM, &i2s_config, 0, NULL);
+    i2s_set_pin(I2S_NUM, &pin_config);
+
+    uint32_t maxBlockSize = wave_data->data_header.Subchunk2Size;
+    maxBlockSize = (maxBlockSize % BLOCK_SIZE)? (maxBlockSize /BLOCK_SIZE +1): (maxBlockSize / BLOCK_SIZE);
+    uint32_t blockCount = 0;
+
+    uint8_t *address = wave_data->data;
+    uint32_t blockSize = BLOCK_SIZE;
+
+    while(1){
+        blockCount ++;
+        if (blockCount >= maxBlockSize){
+            i2s_zero_dma_buffer(I2S_NUM);
+            return;
+        }else{
+            if (blockCount == maxBlockSize -1){
+                blockSize = wave_data->data_header.Subchunk2Size - (blockCount*BLOCK_SIZE);
+            }else{
+                blockSize = BLOCK_SIZE;
+            }
+            address = wave_data->data + (blockCount- 1) * BLOCK_SIZE;
+            i2s_write_bytes(I2S_NUM, (const char *)address, blockSize, portMAX_DELAY);
+        }
+    }
+
+}
+
+
+
+void SoundVoice_Init(void)
 {
     WM8978_Init();
     i2s_init();
-    // xTaskCreate(&sound_voice_task, "SOUND_VOICE", 4096, NULL, tskIDLE_PRIORITY+5, NULL);
+    soundVoideEventQueue = xQueueCreate( 1, sizeof(uint32_t) );
+    xTaskCreate(&soundVoice_task, "SOUND_VOICE", 4096, NULL, tskIDLE_PRIORITY+5, NULL);
 }

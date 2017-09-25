@@ -42,7 +42,7 @@ int32_t apps_do_recipe(void *command, uint16_t len)
 
 int32_t apps_do_ctrl(void *command, uint16_t len)
 {
-	appCmdDescriptor_t cmdDesc;
+	AppCmdDescriptor_t cmdDesc;
 
     uint16_t transTime = 0;
     if(len == 0) {
@@ -59,22 +59,22 @@ int32_t apps_do_ctrl(void *command, uint16_t len)
 
     if (light->ctOnoffValid){
     	onOff = light->ctOnoffCtrl;
-        zigbee_ctrl_on_off(&cmdDesc,APS_SHORT_ADDRESS,0,0,onOff);
+        ZigbeeCtrl_OnOff(&cmdDesc,APS_SHORT_ADDRESS,0,0,onOff);
         IoT_DEBUG(JD_SMART_DBG | IoT_DBG_INFO,("do_ctrl onOff: %d\n",onOff));
 
     }else if(light->ctLevelValid){
     	level = light->ctLevelCtrl;
-        zigbee_ctrl_move_to_level(&cmdDesc,APS_SHORT_ADDRESS,0,0,ZCL_LEVEL_CONTROL_CLUSTER_MOVE_TO_LEVEL_COMMAND_ID,level, 5);
+        ZigbeeCtrl_MoveToLevel(&cmdDesc,APS_SHORT_ADDRESS,0,0,ZCL_LEVEL_CONTROL_CLUSTER_MOVE_TO_LEVEL_COMMAND_ID,level, 5);
         IoT_DEBUG(JD_SMART_DBG | IoT_DBG_INFO,("do_ctrl level: %d\n",level));
 
     }else if (light->ctValueValid){
         ctValue = ((uint16_t)(light->ctValueCtrlHi)<< 8) + light->ctValueCtrlLo;
-        zigbee_ctrl_move_to_colorTemperature(&cmdDesc,APS_SHORT_ADDRESS,0,0,(uint16_t)(1000000/ctValue), 5);
+        ZigbeeCtrl_MoveToColorTemperature(&cmdDesc,APS_SHORT_ADDRESS,0,0,(uint16_t)(1000000/ctValue), 5);
         IoT_DEBUG(JD_SMART_DBG | IoT_DBG_INFO,("do_ctrl colorT: %d\n",ctValue));
     }
 
     if(light->ctOnoffValid || light->ctLevelValid || light->ctValueValid){
-    	zigbee_cmd_service_process_packet(&cmdDesc);
+    	ZigbeeCmdService_ProcessPacket(&cmdDesc);
     }
 
     return JD_CONTROL_SUCCESS;

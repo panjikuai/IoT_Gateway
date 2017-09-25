@@ -15,9 +15,9 @@ typedef struct _WiFiConfigParam_t{
   uint8_t channel;
 }WiFiConfigParam_t;
 
-esp_err_t wifi_get_Wifi_param(WiFiConfigParam_t *param);
-esp_err_t wifi_set_wifi_param(WiFiConfigParam_t *param);
-void wifi_connect_to_target_ap(WiFiConfigParam_t *param);
+esp_err_t WIFI_GetWifiParam(WiFiConfigParam_t *param);
+esp_err_t WIFI_SetWifiParam(WiFiConfigParam_t *param);
+void WIFI_ConnecToTargetAP(WiFiConfigParam_t *param);
 
 
 

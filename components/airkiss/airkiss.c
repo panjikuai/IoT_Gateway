@@ -366,7 +366,7 @@ void airkissTask(void *pvParameter)
 	}
 }
 
-void airkiss_start(Airkiss_callback_t cb)
+void Airkiss_start(Airkiss_callback_t cb)
 {
 	airkiss_callback = cb;
 	memset((uint8_t *)&airkissWifiParam,0,sizeof(AirkissWiFiParam_t));

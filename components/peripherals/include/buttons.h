@@ -1,10 +1,15 @@
 #ifndef BUTTONS_H
 #define BUTTONS_H
 
-typedef void(*button_short_press_callback_t)(void);
-typedef void(*button_long_press_callback_t)(void);
+typedef enum {
+    BUTTON_RELOAD   = 0,
+    BUTTON_FUNC     = 1
+}ButtonValue_t;
 
-void button_init(button_short_press_callback_t short_cb, button_long_press_callback_t long_cb);
+typedef void(*ButtonShortPressCallback_t)(ButtonValue_t value);
+typedef void(*ButtonLongPressCallback_t)(ButtonValue_t value);
+
+void Button_KeyEventInit(ButtonShortPressCallback_t short_cb, ButtonLongPressCallback_t long_cb);
 
 
 
