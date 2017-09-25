@@ -41,16 +41,6 @@
 
 #include "fft.h"
 
-
-
-extern QueueHandle_t soundVoideEventQueue;
-
-WiFiConfigParam_t gWifiParam;
-Wifi_status_t gWifiStatus = WIFI_STATUS_WAIT;
-
-TimerHandle_t systemTimer = NULL;
-QueueHandle_t wifiParamSetQueue = NULL;
-
 #define EUTTON_EVENT_TYPE_SHORT_PRESS 0
 #define EUTTON_EVENT_TYPE_LONG_PRESS  1
 
@@ -59,11 +49,16 @@ typedef struct{
 	uint16_t keyValue; 
 }ButtonHandleEvent_t;
 
+extern QueueHandle_t soundVoideEventQueue;
+
+WiFiConfigParam_t gWifiParam;
+Wifi_status_t gWifiStatus = WIFI_STATUS_WAIT;
+
+TimerHandle_t systemTimer = NULL;
+QueueHandle_t wifiParamSetQueue = NULL;
 QueueHandle_t buttonHandleQueue = NULL;
 
-
 uint8_t ipaddr[4];
-
 void get_ip_address(uint8_t *ip)
 {
 	memcpy(ip,ipaddr,4);
@@ -72,7 +67,6 @@ void get_ip_address(uint8_t *ip)
 void get_wifi_mac_address(uint8_t *mac)
 {
 	esp_efuse_mac_get_default(mac);
-	// esp_efuse_read_mac(mac);
 }
 
 esp_err_t event_handler(void *ctx, system_event_t *event)
@@ -89,15 +83,10 @@ esp_err_t event_handler(void *ctx, system_event_t *event)
 	{
     	IoT_DEBUG(WIFI_DBG | IoT_DBG_INFO,("got IP address\n"));
         system_event_sta_got_ip_t *got_ip = &event->event_info.got_ip;
-        // IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO, ("SYSTEM_EVENT_STA_GOTIP, ip:" IPSTR ", mask:" IPSTR ", gw:" IPSTR "\n",
-		// IP2STR(&got_ip->ip_info.ip),
-		// IP2STR(&got_ip->ip_info.netmask),
-		// IP2STR(&got_ip->ip_info.gw)));
 		ipaddr[0] = ip4_addr1_16(&got_ip->ip_info.ip);
 		ipaddr[1] = ip4_addr2_16(&got_ip->ip_info.ip);
 		ipaddr[2] = ip4_addr3_16(&got_ip->ip_info.ip);
 		ipaddr[3] = ip4_addr4_16(&got_ip->ip_info.ip);
-
     	gWifiStatus = WIFI_STATUS_GOT_IP;
         break;
 	}
@@ -161,7 +150,7 @@ void wifi_Task(void *pvParameter)
 			}
 		}
 		vTaskDelay(5/portTICK_PERIOD_MS);
-		// IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO,("ssid: %s, pwd: %s\r",gWifiParam.ssid,gWifiParam.pwd));
+		//IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO,("ssid: %s, pwd: %s\r",gWifiParam.ssid,gWifiParam.pwd));
 	}
 }
 
@@ -175,9 +164,6 @@ void systemTimerCallback( TimerHandle_t xTimer )
 	}else{
 		//IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO, ("system timer\n") );
 	}
-	// uint32_t randN = rand();
-	// lightColorIndex = (uint8_t)(randN % 3);
-	// IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO, ("lightColorIndex:%d,randN:%d\n",lightColorIndex,randN) );
 }
 
 void keyShortPressedHandle(ButtonValue_t key)
