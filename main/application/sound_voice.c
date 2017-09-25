@@ -77,7 +77,7 @@ void i2s_init(void)
     i2s_config_t i2s_config = {
         .mode = I2S_MODE_MASTER | I2S_MODE_TX,                                  // Only TX
         .sample_rate = 44100,//SAMPLE_RATE,
-        .bits_per_sample = 1616,                                                  //16-bit per channel
+        .bits_per_sample = 16,                                                  //16-bit per channel
         .channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT,//((wave_format->fmt.NumChannels == 2)? I2S_CHANNEL_FMT_RIGHT_LEFT : I2S_CHANNEL_FMT_ALL_RIGHT),                           //2-channels
         .communication_format = I2S_COMM_FORMAT_I2S | I2S_COMM_FORMAT_I2S_MSB,
         .dma_buf_count = 6,
