@@ -1056,8 +1056,6 @@ void deviceInfoQueryCallback( TimerHandle_t xTimer )
 }
 
 
-
-
 void GatewayManager_Init(void)
 {
 	ZigbeeOgnzInfo_Init();
