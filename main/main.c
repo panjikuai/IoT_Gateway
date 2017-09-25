@@ -116,11 +116,6 @@ void SmartConfig_Callback(uint8_t status, void *pdata)
 	gWifiStatus = status;
 }
 
-void cloud_status_call_back(uint8_t status, void *info)
-{
-
-}
-
 void wifi_Task(void *pvParameter)
 {
 	ButtonHandleEvent_t event;
@@ -128,7 +123,9 @@ void wifi_Task(void *pvParameter)
 	while(1){
 		
         if (xQueueReceive( wifiParamSetQueue , &param, 0 ) == pdTRUE){
-        	WIFI_SetWifiParam(&param);
+			WIFI_SetWifiParam(&param);
+			IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO,("ssid: %s, pwd: %s\r",param.ssid,param.pwd));
+			vTaskDelay(100/portTICK_PERIOD_MS);
         	esp_restart();
 		}
 		
@@ -149,17 +146,15 @@ void wifi_Task(void *pvParameter)
 				}
 			}
 		}
-		vTaskDelay(5/portTICK_PERIOD_MS);
-		//IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO,("ssid: %s, pwd: %s\r",gWifiParam.ssid,gWifiParam.pwd));
+		vTaskDelay(500/portTICK_PERIOD_MS);
+		IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO,("ssid: %s, pwd: %s\n",gWifiParam.ssid,gWifiParam.pwd));
 	}
 }
 
 void systemTimerCallback( TimerHandle_t xTimer )
 {
-	static uint8_t state = 0;
-
-	if (gWifiStatus != WIFI_STATUS_CONNECTED_AP && gWifiStatus != WIFI_STATUS_GOT_IP){
-		state = !state;
+	if (gWifiStatus == WIFI_STATUS_DISCONNECTED_AP ){
+		// esp_wifi_connect();
 	}else{
 		//IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO, ("system timer\n") );
 	}
@@ -209,12 +204,13 @@ void app_main(void)
     if (WIFI_GetWifiParam(&gWifiParam) != ESP_OK){
 		Airkiss_Start(SmartConfig_Callback);
     }else{
+		IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO,("ssid: %s, pwd: %s\r",gWifiParam.ssid,gWifiParam.pwd));
     	WIFI_ConnecToTargetAP(&gWifiParam);
 		GatewayManager_Init();
 		NetworkManager_Init();
 	}
 
-	systemTimer = xTimerCreate("SYS_Timer", 5000 / portTICK_PERIOD_MS, pdTRUE, 0, systemTimerCallback );
+	systemTimer = xTimerCreate("SYS_Timer", 2000 / portTICK_PERIOD_MS, pdTRUE, 0, systemTimerCallback );
 	xTimerStart(systemTimer,0);
 
 	xTaskCreate(&wifi_Task, "WIFI", 2048, NULL, tskIDLE_PRIORITY+1, NULL);
