@@ -113,7 +113,7 @@ esp_err_t event_handler(void *ctx, system_event_t *event)
 }
 
 
-void smartConfig_callback(uint8_t status, void *pdata)
+void SmartConfig_Callback(uint8_t status, void *pdata)
 {
 	WiFiConfigParam_t *wifiParam = (WiFiConfigParam_t *)pdata;
 	if (status == WIFI_STATUS_FOUND_CHANNEL){
@@ -228,7 +228,7 @@ void app_main(void)
 	buttonHandleQueue = xQueueCreate( 1, sizeof(ButtonHandleEvent_t) );
 
     if (WIFI_GetWifiParam(&gWifiParam) != ESP_OK){
-		Airkiss_Start(smartConfig_callback);
+		Airkiss_Start(SmartConfig_Callback);
     }else{
     	WIFI_ConnecToTargetAP(&gWifiParam);
 		GatewayManager_Init();
