@@ -344,14 +344,8 @@ void app_main(void)
     
 	Button_KeyEventInit(keyShortPressedHandle, keyLongPressedHandle);
 
-<<<<<<< HEAD
-
-    gpio_set_direction(GPIO_NUM_2, GPIO_MODE_OUTPUT);
-    button_init(NULL, reload_button_pressed);
-=======
 	systemTimer = xTimerCreate("SYS_Timer", 5000 / portTICK_PERIOD_MS, pdTRUE, 0, systemTimerCallback );
 	xTimerStart(systemTimer,0);
->>>>>>> IoT_Gateway
 	
 	SoundVoice_Init();
 	// A2DP_Init();
