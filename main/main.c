@@ -327,9 +327,6 @@ void app_main(void)
 	IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO, ("RAM left %d\n", esp_get_free_heap_size()) );
     ESP_ERROR_CHECK( nvs_flash_init() );
 
-	Sound_Voice_Init();
-	// A2DP_Init();
-
     tcpip_adapter_init();
     ESP_ERROR_CHECK( esp_event_loop_init(event_handler, NULL) );
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
@@ -364,11 +361,7 @@ void app_main(void)
     	WIFI_ConnecToTargetAP(&gWifiParam);
 		GatewayManager_Init();
 		NetworkManager_Init();
-<<<<<<< HEAD
 	}
-=======
-    }
->>>>>>> 909117508888aa973bb421781020fdced2afb58d
 
     xTaskCreate(&wifi_Task, "WIFI", 2048, NULL, tskIDLE_PRIORITY+1, NULL);
 }
