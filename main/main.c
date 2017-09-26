@@ -79,14 +79,13 @@ esp_err_t event_handler(void *ctx, system_event_t *event)
     case SYSTEM_EVENT_STA_CONNECTED:
     	gWifiStatus = WIFI_STATUS_CONNECTED_AP;
     	break;
-    case SYSTEM_EVENT_STA_GOT_IP:
-	{
-    	IoT_DEBUG(WIFI_DBG | IoT_DBG_INFO,("got IP address\n"));
+    case SYSTEM_EVENT_STA_GOT_IP:{
         system_event_sta_got_ip_t *got_ip = &event->event_info.got_ip;
 		ipaddr[0] = ip4_addr1_16(&got_ip->ip_info.ip);
 		ipaddr[1] = ip4_addr2_16(&got_ip->ip_info.ip);
 		ipaddr[2] = ip4_addr3_16(&got_ip->ip_info.ip);
 		ipaddr[3] = ip4_addr4_16(&got_ip->ip_info.ip);
+		IoT_DEBUG(WIFI_DBG | IoT_DBG_INFO,("Got IP Addr:%d.%d.%d.%d\n",ipaddr[0],ipaddr[1],ipaddr[2],ipaddr[3]));
     	gWifiStatus = WIFI_STATUS_GOT_IP;
         break;
 	}
@@ -146,8 +145,8 @@ void wifi_Task(void *pvParameter)
 				}
 			}
 		}
-		vTaskDelay(500/portTICK_PERIOD_MS);
-		IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO,("ssid: %s, pwd: %s\n",gWifiParam.ssid,gWifiParam.pwd));
+		vTaskDelay(50/portTICK_PERIOD_MS);
+		// IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO,("ssid: %s, pwd: %s\n",gWifiParam.ssid,gWifiParam.pwd));
 	}
 }
 
