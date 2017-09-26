@@ -3,7 +3,6 @@
 #include <string.h>
 
 #include "nvs.h"
-
 #include "esp_wifi.h"
 #include "esp_system.h"
 #include "esp_event.h"
@@ -11,7 +10,6 @@
 
 #include "storage.h"
 #include "wifi.h"
-
 
 
 #define SMART_CONFIG_DIR 		"WiFi"
@@ -35,7 +33,6 @@ esp_err_t WIFI_SetWifiParam(WiFiConfigParam_t *param)
 	esp_err_t err;
 	err = storage_setflash(SMART_CONFIG_DIR, SMART_CONFIG_FILE_WIFI,param, sizeof(WiFiConfigParam_t));
 	return err;
-
 }
 
 void WIFI_ConnecToTargetAP(WiFiConfigParam_t *param)

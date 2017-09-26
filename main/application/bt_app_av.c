@@ -60,8 +60,8 @@ void bt_app_a2d_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *param)
     }
 }
 
-extern void fft_convert(const uint8_t *data, uint32_t len);
-uint8_t i = 0;
+// extern void FFT_DataInput(const uint8_t *data, uint32_t len);
+// uint8_t dataIndex = 0;
 
 void bt_app_a2d_data_cb(const uint8_t *data, uint32_t len)
 {
@@ -69,10 +69,10 @@ void bt_app_a2d_data_cb(const uint8_t *data, uint32_t len)
     // ESP_LOGE(BT_AV_TAG, "audio data length: %u", len);
     // }
     i2s_write_bytes(0, (const char *)data, len, portMAX_DELAY);
-    i++;
-    if ((i%4) == 0){
-        fft_convert(data, len);
-    }
+    // dataIndex++;
+    // if ((dataIndex%4) == 0){
+    //     FFT_DataInput(data, len);
+    // }
 }
 
 void bt_app_rc_ct_cb(esp_avrc_ct_cb_event_t event, esp_avrc_ct_cb_param_t *param)
