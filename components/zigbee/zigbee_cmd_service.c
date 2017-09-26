@@ -271,7 +271,6 @@ void ZigbeeCmdService_Init(void)
 void ZigbeeCmdService_ResetModule(void)
 {
 	gpio_set_direction(GPIO_NUM_17, GPIO_MODE_OUTPUT);
-	
 	gpio_set_level(GPIO_NUM_17, 0);
 	vTaskDelay(10/portTICK_PERIOD_MS);
 	gpio_set_level(GPIO_NUM_17, 1);

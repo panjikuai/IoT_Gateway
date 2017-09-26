@@ -1,6 +1,19 @@
 #include "math.h"  
 #include "fft.h"  
 //精度0.0001弧度  
+
+ 
+  
+#define PI 3.1415926535897932384626433832795028841971  
+ 
+void conjugate_complex(int n,complex in[],complex out[]);  
+void c_plus(complex a,complex b,complex *c);//复数加  
+void c_mul(complex a,complex b,complex *c) ;//复数乘  
+void c_sub(complex a,complex b,complex *c); //复数减法  
+void c_div(complex a,complex b,complex *c); //复数除法  
+void fft(int N,complex f[]);//傅立叶变换 输出也存在数组f中
+void ifft(int N,complex f[]); // 傅里叶逆变换  
+void c_abs(complex f[],float out[],int n);//复数数组取模  
   
 void conjugate_complex(int n,complex in[],complex out[])  
 {  
@@ -112,3 +125,46 @@ void ifft(int N,complex f[])
     f[i].real = (f[i].real)/N;
   }  
 }  
+
+#define FFT_N  64
+
+void FFT_DataInput(const uint8_t *data, uint32_t len)
+{
+    complex fftDataBuff[FFT_N];
+    // fft data is uint16_t array
+    if (len < FFT_N*2){
+      return;
+    }
+    uint16_t *buff =  (uint16_t *)data;
+    uint16_t step = len/FFT_N;
+    step = step - (step%2);
+    // select 64 data from the input
+    for (uint16_t i = 0; i < FFT_N; i++){
+        fftDataBuff[i].real = (float)buff[i*step];
+        fftDataBuff[i].imag = 0;
+    }
+
+}
+
+uint32_t FFT_Execute(int N,complex f[])
+{
+    fft(N,f);
+    return 0;
+}
+
+// float level_low = 0;
+// float level_medium = 0;
+// float level_high = 0;
+// for (uint16_t i = 0; i< (FFT_N/2);i++){
+//     if (i < (FFT_N/6)){
+//         level_low += sqrt( fft_result[i].real * fft_result[i].real+fft_result[i].imag * fft_result[i].imag);
+//     }else if (i < (FFT_N/3)){
+//         level_medium += sqrt( fft_result[i].real * fft_result[i].real+fft_result[i].imag * fft_result[i].imag);
+//     }else{
+//         level_high += sqrt( fft_result[i].real * fft_result[i].real+fft_result[i].imag * fft_result[i].imag);
+//     }
+// }
+
+// level_low = level_low/(FFT_N/6);
+// level_medium = level_medium/(FFT_N/6);
+// level_high = level_high/((FFT_N/2)-FFT_N/3);

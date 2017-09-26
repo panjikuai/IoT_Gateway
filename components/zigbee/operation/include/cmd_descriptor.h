@@ -645,7 +645,7 @@ typedef struct{
 
 typedef struct {
 	uint16_t    sof;
-	uint16_t    messageId;
+	uint16_t    magicCode;
 	uint8_t     messageType;
 	uint8_t 	sumFrames;
 	uint8_t 	currFrameNo;
