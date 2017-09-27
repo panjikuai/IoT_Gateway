@@ -120,7 +120,6 @@ void wifi_Task(void *pvParameter)
 	ButtonHandleEvent_t event;
 	WiFiConfigParam_t 	param;
 	while(1){
-		
         if (xQueueReceive( wifiParamSetQueue , &param, 0 ) == pdTRUE){
 			WIFI_SetWifiParam(&param);
 			IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO,("ssid: %s, pwd: %s\r",param.ssid,param.pwd));
@@ -136,24 +135,24 @@ void wifi_Task(void *pvParameter)
 					xQueueSend( wifiParamSetQueue, &param, 0 );
 				}
 			}else{
+				uint32_t soundListIndex;
 				if (event.keyValue == BUTTON_FUNC){
-					uint32_t soundIndex = 1;
-					xQueueSend( soundVoideEventQueue, &soundIndex, 10/portTICK_PERIOD_MS );
+					soundListIndex = 1;
+					xQueueSend( soundVoideEventQueue, &soundListIndex, 10/portTICK_PERIOD_MS );
 				}else if (event.keyValue == BUTTON_RELOAD){
-					uint32_t soundIndex = 0;
-					xQueueSend( soundVoideEventQueue, &soundIndex, 10/portTICK_PERIOD_MS );
+					soundListIndex = 0;
+					xQueueSend( soundVoideEventQueue, &soundListIndex, 10/portTICK_PERIOD_MS );
 				}
 			}
 		}
 		vTaskDelay(50/portTICK_PERIOD_MS);
-		// IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO,("ssid: %s, pwd: %s\n",gWifiParam.ssid,gWifiParam.pwd));
 	}
 }
 
 void systemTimerCallback( TimerHandle_t xTimer )
 {
 	if (gWifiStatus == WIFI_STATUS_DISCONNECTED_AP ){
-		// esp_wifi_connect();
+		
 	}else{
 		//IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO, ("system timer\n") );
 	}

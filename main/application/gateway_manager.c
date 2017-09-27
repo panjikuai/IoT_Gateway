@@ -286,7 +286,7 @@ uint16_t get_device_state_by_block_index(uint8_t *buff, uint8_t blockIndex)
 void process_gateway_connect_packet(NetworkMessage_t *msg)
 {
 	NetworkMessage_t *message =(NetworkMessage_t *)udp_send_Buff;
-	memcpy((uint8_t *)&message->networkHeader, (uint8_t *)&msg->networkHeader, sizeof(network_header_t));
+	memcpy((uint8_t *)&message->networkHeader, (uint8_t *)&msg->networkHeader, sizeof(NetworkHeader_t));
 	message->networkHeader.messageType = NETWORK_MSG_TYPE_NON;
 	message->networkHeader.packageLength = 4 + sizeof(GetNetworkConnectInfo_t);
 	message->packTypeId = msg->packTypeId | CMD_RSP;
@@ -333,7 +333,7 @@ bool process_ognz_struct_packet(NetworkMessage_t *msg)
 	zigbee_device_list_t  *zigbee_device_list;
 
 	NetworkMessage_t *message = (NetworkMessage_t *)udp_send_Buff;
-	memcpy(&message->networkHeader,&msg->networkHeader, sizeof(network_header_t));
+	memcpy(&message->networkHeader,&msg->networkHeader, sizeof(NetworkHeader_t));
 
 	message->networkHeader.messageType = NETWORK_MSG_TYPE_NON;
 	message->networkHeader.sumFrames  = 1;
@@ -411,7 +411,7 @@ bool process_devices_info_packet(NetworkMessage_t *msg)
 	uint16_t *device_info_start_index;
 
 	NetworkMessage_t *message = (NetworkMessage_t *)udp_send_Buff;
-	memcpy(&message->networkHeader,&msg->networkHeader, sizeof(network_header_t));
+	memcpy(&message->networkHeader,&msg->networkHeader, sizeof(NetworkHeader_t));
 
 	message->networkHeader.messageType = NETWORK_MSG_TYPE_NON;
 	message->networkHeader.sumFrames  = 1;
@@ -472,7 +472,7 @@ bool process_device_state_packet(NetworkMessage_t *msg)
 	uint16_t size;
 
 	NetworkMessage_t *message = (NetworkMessage_t *)udp_send_Buff;
-	memcpy(&message->networkHeader,&msg->networkHeader, sizeof(network_header_t));
+	memcpy(&message->networkHeader,&msg->networkHeader, sizeof(NetworkHeader_t));
 	message->networkHeader.messageType = NETWORK_MSG_TYPE_NON;
 	message->networkHeader.sumFrames  = 1;
 	message->networkHeader.currFrameNo = 1;
@@ -499,7 +499,7 @@ bool process_device_state_packet(NetworkMessage_t *msg)
 }
 
 
-void device_state_rsp_callback(Cmd_Response_t *resp, struct sockaddr addr,network_header_t header,uint8_t packTypeId, uint8_t command)
+void device_state_rsp_callback(Cmd_Response_t *resp, struct sockaddr addr,NetworkHeader_t header,uint8_t packTypeId, uint8_t command)
 {
 	if( resp->status != COMM_SUCCESS  || resp->responsePayload[3] != (PACK_TYPE_DEVICE_STATE_MANAGEMENT | 0x80) ){
 		return;
@@ -678,7 +678,7 @@ void zigbeeDeviceStateQuery(AppCmdDescriptor_t *cmdDesc)
 	xTimerChangePeriod( zigbeeInfoQueryTimer, DEVICE_INFO_QUERY_INTERVAL/portTICK_PERIOD_MS, 0 );
 }
 
-void zigbee_cmd_callback(Cmd_Response_t *resp, struct sockaddr addr,network_header_t networkHeader,uint8_t packTypeId, uint8_t command)
+void zigbee_cmd_callback(Cmd_Response_t *resp, struct sockaddr addr,NetworkHeader_t networkHeader,uint8_t packTypeId, uint8_t command)
 {
 	if (resp->responseLength <= (HEAD_SIZE_GENERIC_HEADER + 2)){
 		return;
@@ -686,7 +686,7 @@ void zigbee_cmd_callback(Cmd_Response_t *resp, struct sockaddr addr,network_head
 	// need to feedback
 	AppCmdDescriptor_t *cmdDesc = (AppCmdDescriptor_t *)resp->responsePayload;
 	NetworkMessage_t message;
-	memcpy(&message.networkHeader,&networkHeader,sizeof(network_header_t));
+	memcpy(&message.networkHeader,&networkHeader,sizeof(NetworkHeader_t));
 	message.networkHeader.messageType = NETWORK_MSG_TYPE_NON;
 	message.networkHeader.sumFrames  = 1;
 	message.networkHeader.currFrameNo = 1;
@@ -831,7 +831,7 @@ void GatewayManager_HandleNetworkRequest(void *msg)
     	break;
 	case MSG_TYPE_ID_CTRL:
 		if(zigbee_ctrl_cmd_handle(&cmdDesc,&message->DeviceOprt)){
-			memcpy(&cmdDesc.networkHeader,&message->networkHeader,sizeof(network_header_t));
+			memcpy(&cmdDesc.networkHeader,&message->networkHeader,sizeof(NetworkHeader_t));
 			cmdDesc.packTypeId = message->packTypeId;
 			cmdDesc.command = message->command;
 			cmdDesc.sourceAddr = message->sourceAddr;
@@ -843,7 +843,7 @@ void GatewayManager_HandleNetworkRequest(void *msg)
 		IoT_DEBUG(LWIP_DBG | IoT_DBG_WARNING,("message->command :%02x\r\n",message->command));
 		if (message->command == CMD_CONFIG_ZGIBEE_DEVICE){
 			if (zigbee_config_cmd_handle(&cmdDesc,&message->GroupSceneMgmt)){
-				memcpy(&cmdDesc.networkHeader,&message->networkHeader,sizeof(network_header_t));
+				memcpy(&cmdDesc.networkHeader,&message->networkHeader,sizeof(NetworkHeader_t));
 				cmdDesc.packTypeId = message->packTypeId;
 				cmdDesc.command = message->command;
 				cmdDesc.sourceAddr = message->sourceAddr;
@@ -852,7 +852,7 @@ void GatewayManager_HandleNetworkRequest(void *msg)
 			}
 		}else if (message->command == CMD_CONFIG_ZIGBEE_GATEWAY){
 			if (zigbee_network_cmd_handle(&cmdDesc,&message->NwkMgmt)){
-				memcpy(&cmdDesc.networkHeader,&message->networkHeader,sizeof(network_header_t));
+				memcpy(&cmdDesc.networkHeader,&message->networkHeader,sizeof(NetworkHeader_t));
 				cmdDesc.packTypeId = message->packTypeId;
 				cmdDesc.command = message->command;
 				cmdDesc.sourceAddr = message->sourceAddr;
@@ -864,7 +864,7 @@ void GatewayManager_HandleNetworkRequest(void *msg)
 	}
 }
 
-void gateway_info_rsp_callback(Cmd_Response_t *resp, struct sockaddr addr,network_header_t header,uint8_t packTypeId, uint8_t commandId)
+void gateway_info_rsp_callback(Cmd_Response_t *resp, struct sockaddr addr,NetworkHeader_t header,uint8_t packTypeId, uint8_t commandId)
 {
 	if( resp->status != COMM_SUCCESS ){
 		return;

@@ -29,7 +29,7 @@ TimerHandle_t deviceInfoReportTimer = NULL;
 extern void get_ip_address(uint8_t *ip);
 extern void get_wifi_mac_address(uint8_t *mac);
 
-bool isVaildDataPackageRequest(network_header_t *header)
+bool isVaildDataPackageRequest(NetworkHeader_t *header)
 {
 	if (header->sof != NETWORK_MSG_SOF || header->messageType > NETWORK_MSG_TYPE_RST){
 		return false;
@@ -37,7 +37,7 @@ bool isVaildDataPackageRequest(network_header_t *header)
 	return true;
 }
 
-bool isSyncDataPackageRequest(network_header_t *header)
+bool isSyncDataPackageRequest(NetworkHeader_t *header)
 {
 	if (header->messageType != NETWORK_MSG_TYPE_CON){
 		return false;
@@ -45,14 +45,14 @@ bool isSyncDataPackageRequest(network_header_t *header)
 	return true;
 }
 
-bool sendAcknowledge(network_header_t *header,struct sockaddr *addr)
+bool sendAcknowledge(NetworkHeader_t *header,struct sockaddr *addr)
 {
-	memcpy(udp_send_Buff, (uint8_t *)header, sizeof(network_header_t));
+	memcpy(udp_send_Buff, (uint8_t *)header, sizeof(NetworkHeader_t));
 	NetworkMessage_t *message =(NetworkMessage_t *)udp_send_Buff;
 	message->networkHeader.messageType = NETWORK_MSG_TYPE_ACK;
 	message->networkHeader.packageLength = 0;
 
-	if (sendto(local_udp_socket,udp_send_Buff, sizeof(network_header_t), 0, addr, sizeof(struct sockaddr)) < 0){
+	if (sendto(local_udp_socket,udp_send_Buff, sizeof(NetworkHeader_t), 0, addr, sizeof(struct sockaddr)) < 0){
 		IoT_DEBUG(LWIP_DBG | IoT_DBG_WARNING,("sendto:ack failed\r\n"));
 		return false;
 	}
@@ -178,12 +178,6 @@ void loadReportInfo(NetworkMessage_t *message)
 
 	ip[3] = 255;
 	sAddr.sin_addr.s_addr =  *((uint32_t *)ip);
-	// IoT_DEBUG(LWIP_DBG | IoT_DBG_INFO,("udp send:%d.%d.%d.%d port:%d\n",
-	// 									(uint8_t)(sAddr.sin_addr.s_addr>>0),
-	// 									(uint8_t)(sAddr.sin_addr.s_addr>>8),
-	// 									(uint8_t)(sAddr.sin_addr.s_addr>>16),
-	// 									(uint8_t)(sAddr.sin_addr.s_addr>>24),
-	// 									htons(sAddr.sin_port)));
 	struct sockaddr sourceAddr;
 	memcpy((uint8_t*)&sourceAddr, (uint8_t *)&sAddr, sizeof(struct sockaddr));
 	sourceAddr.sa_len = sizeof(struct sockaddr);

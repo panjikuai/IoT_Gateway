@@ -646,12 +646,12 @@ typedef struct{
 typedef struct {
 	uint16_t    sof;
 	uint16_t    magicCode;
-	uint8_t     messageType;
+	uint8_t     messageType;  //network_messageType_t
 	uint8_t 	sumFrames;
 	uint8_t 	currFrameNo;
     uint8_t     encrypted;
     uint16_t    packageLength;
-}network_header_t;
+}NetworkHeader_t;
 
 typedef struct PACK{
 	union{
@@ -675,10 +675,10 @@ typedef struct PACK{
 	};
 	uint16_t timeout;
 	struct sockaddr sourceAddr;//for UDP
-    network_header_t    networkHeader;
+    NetworkHeader_t    networkHeader;
 	uint8_t 	        packTypeId;
 	uint8_t 	        command;
-	void (*cmd_response_callback)(Cmd_Response_t *resp, struct sockaddr sourceAddr,network_header_t networkHeader,uint8_t packTypeId, uint8_t command);
+	void (*cmd_response_callback)(Cmd_Response_t *resp, struct sockaddr sourceAddr,NetworkHeader_t networkHeader,uint8_t packTypeId, uint8_t command);
 }AppCmdDescriptor_t;
 
 END_PACK

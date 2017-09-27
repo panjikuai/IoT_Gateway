@@ -51,7 +51,7 @@ typedef struct{
 }GetDevicesState_t;
 
 typedef struct {
-	network_header_t networkHeader;
+	NetworkHeader_t networkHeader;
 	uint8_t 	packTypeId;
 	uint8_t 	command;
 	uint16_t    contentLength;
@@ -73,7 +73,7 @@ typedef struct {
 	struct sockaddr sourceAddr;
 }NetworkMessage_t;
 
-#define NETWORK_MESSAGE_LENGTH   (sizeof(network_header_t) + 4)
+#define NETWORK_MESSAGE_LENGTH   (sizeof(NetworkHeader_t) + 4)
 
 void NetworkManager_Init(void);
 
