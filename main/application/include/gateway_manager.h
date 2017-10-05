@@ -60,8 +60,8 @@ typedef struct{//16
 
 
 typedef struct{
-    uint8_t  endpoint;
-    uint16_t deviceId;
+	uint8_t  endpoint;
+	uint16_t deviceId;
 }endpoint_info_t;
 
 typedef struct{//1 + 3*3 = 10 *128 = 1280

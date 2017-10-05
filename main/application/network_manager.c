@@ -72,8 +72,11 @@ void handleUdpRequest(uint8_t *buff, int32_t length)
 		if (packageLength > length || isVaildDataPackageRequest(&message->networkHeader) == false){
 			return;
 		}
+
 		if (isSyncDataPackageRequest(&message->networkHeader) == true){
+			IoT_DEBUG(LWIP_DBG | IoT_DBG_INFO,("send ACK\n"));
 			if (sendAcknowledge(&message->networkHeader,(struct sockaddr*)pAddr)== false){// Send ACK
+				IoT_DEBUG(LWIP_DBG | IoT_DBG_INFO,("send ACK error!\n"));
 				return;
 			}
 		}
@@ -106,11 +109,19 @@ void networkCommTask(void *pvParameter)
 				 //IoT_DEBUG(LWIP_DBG | IoT_DBG_INFO,("udp client:%s,got data:%d\n",inet_ntoa(sAddr.sin_addr),lRetVal));
 				uint8_t *pdis = (uint8_t *)&sAddr.sin_addr.s_addr;
 				IoT_DEBUG(LWIP_DBG | IoT_DBG_INFO,("udp client:%d.%d.%d.%d port:%d len:%d\n",pdis[0],pdis[1],pdis[2],pdis[3],htons(sAddr.sin_port),lRetVal));
-				printf("receive:");
-				for(uint16_t i = 0; i < lRetVal;i++){
-					printf("%02x ",udp_recv_buf[i]);
-				}
-				printf("\n");
+				// printf("RECV:");
+				// for(uint16_t i = 0; i < lRetVal;i++){
+				// 	printf("%02x ",udp_recv_buf[i]);
+				// }
+				// printf("\n");
+				// pdis[3] = 255;
+				// if (sendto(local_udp_socket,udp_recv_buf, lRetVal, 0, (struct sockaddr *)&sAddr, sizeof(struct sockaddr)) < 0){
+				// 	IoT_DEBUG(LWIP_DBG | IoT_DBG_WARNING,("sendto:ack failed\r\n"));
+				// }else{
+				// 	IoT_DEBUG(LWIP_DBG | IoT_DBG_WARNING,("sendto:ack\n"));
+				// }
+
+				pdis[3] = 255;
 				uint8_t *p = udp_recv_buf + RX_MAX_BUFFER_SIZE;
 				memcpy(p, (uint8_t*)&sAddr, sizeof(struct sockaddr));
 				handleUdpRequest(udp_recv_buf, lRetVal);
@@ -145,7 +156,7 @@ void networkMaintainTask(void *pvParameter)
 		if(xQueueReceive(networkInQueue, &message, 0)){
 			GatewayManager_HandleNetworkRequest((void *)&message);
 		}
-		vTaskDelay(2/portTICK_PERIOD_MS);
+		vTaskDelay(5/portTICK_PERIOD_MS);
 		
 	}
 
@@ -207,7 +218,7 @@ void NetworkManager_Init(void)
 	xTimerStart(deviceInfoReportTimer,0);
 
 	networkInQueue = xQueueCreate( 5, sizeof(NetworkMessage_t) );
-	xTaskCreate(&networkMaintainTask, "LOCAL_UDP", 4096, NULL, tskIDLE_PRIORITY+2, NULL);
-	xTaskCreate(&networkCommTask,  	  "UDP_SOCK", 2048, NULL, tskIDLE_PRIORITY+5, NULL);
+	xTaskCreate(&networkMaintainTask, "LOCAL_UDP", 4096, NULL, tskIDLE_PRIORITY+3, NULL);
+	xTaskCreate(&networkCommTask,  	  "UDP_SOCK", 4096, NULL, tskIDLE_PRIORITY+3, NULL);
 }
 

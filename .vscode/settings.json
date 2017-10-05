@@ -18,6 +18,7 @@
         "bt_app_av.c": "cpp",
         "iot_debug.c": "cpp",
         "storage.c": "cpp",
-        "cstdint": "cpp"
+        "cstdint": "cpp",
+        "typeinfo": "cpp"
     }
 }

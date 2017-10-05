@@ -174,5 +174,5 @@ void SoundVoice_Init(void)
     WM8978_Init();
     I2S_Init();
     soundVoideEventQueue = xQueueCreate( 1, sizeof(uint32_t) );
-    xTaskCreate(&soundVoice_task, "SVOICE", 4096, NULL, tskIDLE_PRIORITY+5, NULL);
+    xTaskCreate(&soundVoice_task, "SVOICE", 4096, NULL, tskIDLE_PRIORITY+1, NULL);
 }

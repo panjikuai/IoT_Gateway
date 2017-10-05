@@ -156,6 +156,7 @@ void systemTimerCallback( TimerHandle_t xTimer )
 	}else{
 		//IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO, ("system timer\n") );
 	}
+	IoT_DEBUG(SMART_CONFIG_DBG | IoT_DBG_INFO, ("System HeartBreak\n") );
 }
 
 void keyShortPressedHandle(ButtonValue_t key)
@@ -208,8 +209,8 @@ void app_main(void)
 		NetworkManager_Init();
 	}
 
-	systemTimer = xTimerCreate("SYS_Timer", 2000 / portTICK_PERIOD_MS, pdTRUE, 0, systemTimerCallback );
-	xTimerStart(systemTimer,0);
+	systemTimer = xTimerCreate("SYS_Timer", 5000 / portTICK_PERIOD_MS, pdTRUE, 0, systemTimerCallback );
+	//xTimerStart(systemTimer,0);
 
 	xTaskCreate(&wifi_Task, "WIFI", 2048, NULL, tskIDLE_PRIORITY+1, NULL);
 	

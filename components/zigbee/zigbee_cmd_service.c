@@ -264,7 +264,7 @@ void ZigbeeCmdService_Init(void)
 	zigbee_cmd_queue = xQueueCreate(ZIGBEE_CMD_QUEUE_LEN, sizeof(void *));
 	zigbee_cmd_result_queue = xQueueCreate(ZIGBEE_CMD_RESULT_QUEUE_LEN, sizeof(uint8_t));
 	QueueUart_Init(&uart_queue);
-	xTaskCreate(&zigbee_data_recv_task, "ZB_RECV", 2048, NULL, tskIDLE_PRIORITY+4, NULL);
+	xTaskCreate(&zigbee_data_recv_task, "ZB_RECV", 2048, NULL, tskIDLE_PRIORITY+2, NULL);
 }
 
 

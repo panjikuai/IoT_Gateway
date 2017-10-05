@@ -39,7 +39,7 @@ void jd_smart_task(void *pvParameter);
 void jd_smart_start(jd_net_status_t net_status,jd_do_recipe_t do_recipe,jd_do_control_t do_control, jd_do_snapshot_t do_snapshot)
 {
 	jd_apps_init(net_status, do_recipe, do_control,  do_snapshot);
-	xTaskCreate(&jd_smart_task, "JD_SMT", 2048, NULL, 5, NULL);
+	xTaskCreate(&jd_smart_task, "JD_SMT", 2048, NULL, tskIDLE_PRIORITY+2, NULL);
 }
 
 void jd_heart_beat_timer_callback( TimerHandle_t xTimer )
@@ -68,8 +68,8 @@ void jd_smart_task(void *pvParameter)
     jd_cloud_queue = xQueueCreate( 1, sizeof(uint32_t) );
     jd_heart_beat_timer = xTimerCreate( "hbTimer", 20000/portTICK_PERIOD_MS, pdTRUE, 0, jd_heart_beat_timer_callback );
 
-    xTaskCreate(&vTaskNetworkTcpEvent, "JD_TCP", 2048, NULL, 6, NULL);
-    xTaskCreate(&vTaskNetworkUdpEvent, "JD_UDP", 2048, NULL, 6, NULL);
+    xTaskCreate(&vTaskNetworkTcpEvent, "JD_TCP", 2048, NULL, tskIDLE_PRIORITY+3, NULL);
+    xTaskCreate(&vTaskNetworkUdpEvent, "JD_UDP", 2048, NULL, tskIDLE_PRIORITY+3, NULL);
     while (1) {
 
         if (gWifiStatus == WIFI_STATUS_GOT_IP){
