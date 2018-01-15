@@ -58,6 +58,8 @@ TimerHandle_t systemTimer = NULL;
 QueueHandle_t wifiParamSetQueue = NULL;
 QueueHandle_t buttonHandleQueue = NULL;
 
+TimerHandle_t ledChangeTimer = NULL;
+
 uint8_t ipaddr[4];
 void get_ip_address(uint8_t *ip)
 {
@@ -177,7 +179,61 @@ void keyLongPressedHandle(ButtonValue_t key)
 	xQueueSend( buttonHandleQueue, &event, 0 );
 }
 
+
+
+void ledChangeTimerCallback( TimerHandle_t xTimer )
+{
+	
+
+
+
+}
+
+
 #define A2DP 1
+
+#define DELAY_TIME 5000
+
+void Display_Task(void *pvParameter)
+{
+	uint16_t ledStatus[3]={0,1,2};
+	while(1){
+
+		if (ledStatus[0]== 0){
+			LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_GREEN, 	254, 254,DELAY_TIME);
+		}else if (ledStatus[0]== 1){
+			LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_BLUE, 	254, 254,DELAY_TIME);
+		}else if (ledStatus[0]== 2){
+			LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_UP, 	LIGHT_RED, 	    254, 254,DELAY_TIME);
+		}
+	
+		if (ledStatus[1]== 0){
+			LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_GREEN, 	254, 254,DELAY_TIME);
+		}else if (ledStatus[1]== 1){
+			LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_BLUE, 	254, 254,DELAY_TIME);
+		}else if (ledStatus[1]== 2){
+			LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_LEFT, 	LIGHT_RED, 	    254, 254,DELAY_TIME);
+		}
+	
+		if (ledStatus[2]== 0){
+			LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, 	LIGHT_GREEN, 	254, 254,DELAY_TIME);
+		}else if (ledStatus[2]== 1){
+			LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, 	LIGHT_BLUE, 	254, 254,DELAY_TIME);
+		}else if (ledStatus[2]== 2){
+			LedDisplay_MoveToHueAndSaturationLevel(LIGHT_CHANNEL_RIGHT, 	LIGHT_RED, 	    254, 254,DELAY_TIME);
+		}
+	
+		for (uint8_t i = 0; i < 3; i++){
+			ledStatus[i]++;
+			if (ledStatus[i] >= 3){
+				ledStatus[i] = 0;
+			}
+		}
+
+		vTaskDelay(DELAY_TIME/portTICK_PERIOD_MS);
+
+	}
+}
 
 
 void app_main(void)
@@ -195,8 +251,13 @@ void app_main(void)
 	LedDisplay_Init();
 	Button_KeyEventInit(keyShortPressedHandle, keyLongPressedHandle);
 	SoundVoice_Init();
-	// A2DP_Init();
-
+#if A2DP == 1
+	A2DP_Init();
+	ledChangeTimer = xTimerCreate("ledChangeTimer", 6000 / portTICK_PERIOD_MS, pdTRUE, 0, ledChangeTimerCallback );
+	xTimerStart(ledChangeTimer,0);
+	xTaskCreate(&Display_Task, "Display", 2048, NULL, tskIDLE_PRIORITY+2, NULL);
+	
+#else
 	wifiParamSetQueue = xQueueCreate( 1, sizeof(WiFiConfigParam_t) );
 	buttonHandleQueue = xQueueCreate( 1, sizeof(ButtonHandleEvent_t) );
 
@@ -209,11 +270,11 @@ void app_main(void)
 		NetworkManager_Init();
 	}
 
-	systemTimer = xTimerCreate("SYS_Timer", 5000 / portTICK_PERIOD_MS, pdTRUE, 0, systemTimerCallback );
+	systemTimer = xTimerCreate("SYS_Timer", 6000 / portTICK_PERIOD_MS, pdTRUE, 0, systemTimerCallback );
 	//xTimerStart(systemTimer,0);
 
 	xTaskCreate(&wifi_Task, "WIFI", 2048, NULL, tskIDLE_PRIORITY+1, NULL);
-	
+#endif
 }
 
 

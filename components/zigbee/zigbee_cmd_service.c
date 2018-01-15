@@ -19,16 +19,9 @@
 #include "zigbee_cmd_service.h"
 #include "iot_debug.h"
 
-//typedef enum PACK{
-//    COMM_STATE_MACHINE_SOF        = 0,
-//    COMM_STATE_MACHINE_SECURIZTY  = 1,
-//    COMM_STATE_MACHINE_LENGTH     = 2,
-//    COMM_STATE_MACHINE_DATAPACK   = 3,
-//    COMM_STATE_MACHINE_PEC        = 4
-//}CommStateMachine_t;
-//
-//CommStateMachine_t commStateMachine = COMM_STATE_MACHINE_SOF;
+#include "gateway_manager.h"
 
+extern QueueHandle_t zigbeeInfoQueueQueryStart;
 extern QueueHandle_t soundVoideEventQueue;
 
 QueueHandle_t uart_queue;
@@ -113,6 +106,10 @@ bool check_response_packet(AppCmdDescriptor_t *pCmdDesc,Cmd_Response_t *rsp)
 			rsp->status = rsp->responsePayload[7];
 		}else if (pCmdDesc->NwkMgmt.commandId == NWK_MGMT_ZGP_COMMISSIONING){
 			rsp->status = rsp->responsePayload[8];
+		}else if (pCmdDesc->NwkMgmt.commandId == NWK_MGMT_GET_DEVICE_SIMP_DESC){
+			InfoQuery_t infoQuery;
+			infoQuery.query_type = QUERY_OGNZ_STRUCTURE;
+			xQueueSend( zigbeeInfoQueueQueryStart, &infoQuery, 0);
 		}
 		break;
 	case PACK_TYPE_DEVICE_GROUP_SCENE_MANAGEMENT:

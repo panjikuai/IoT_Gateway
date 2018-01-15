@@ -79,6 +79,7 @@ void add_node_to_List(device_info_t *deviceInfo, uint32_t timeout)
 		node->next = NULL;
 		pNodePrv->next = node;
 	}
+
 }
 
 bool delete_node_from_List(device_info_t *deviceInfo)

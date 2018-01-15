@@ -121,7 +121,7 @@ void networkCommTask(void *pvParameter)
 				// 	IoT_DEBUG(LWIP_DBG | IoT_DBG_WARNING,("sendto:ack\n"));
 				// }
 
-				pdis[3] = 255;
+				// pdis[3] = 255;
 				uint8_t *p = udp_recv_buf + RX_MAX_BUFFER_SIZE;
 				memcpy(p, (uint8_t*)&sAddr, sizeof(struct sockaddr));
 				handleUdpRequest(udp_recv_buf, lRetVal);
